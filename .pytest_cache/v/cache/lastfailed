@@ -1,0 +1,10 @@
+{
+  "tests/test_routes.py::TestAnswer::test_add_answer_with_both_answer_and_question_details": true,
+  "tests/test_routes.py::TestAnswer::test_add_answer_without_question": true,
+  "tests/test_routes.py::TestQuestions::test_add_question": true,
+  "tests/test_routes.py::TestQuestions::test_delete_question": true,
+  "tests/test_routes.py::TestQuestions::test_get_all_questions": true,
+  "tests/test_routes.py::TestQuestions::test_get_one_question": true,
+  "tests/test_routes.py::TestQuestions::test_password_correct": true,
+  "tests/test_routes.py::TestUsers::test_user_login_successfully": true
+}
