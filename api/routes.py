@@ -142,7 +142,7 @@ def delete_question(questionId):
                 'message': 'There are no questions to delete!'
             }), 400
         for question in questions:
-            if questionId == question['questionId']:
+            if questionId == question.questionId:
                 questions.remove(question)
                 return jsonify({
                     'message': 'Question deleted!'
@@ -150,7 +150,7 @@ def delete_question(questionId):
     except IndexError:
         return jsonify({
             'message': 'Question does not exist.'
-        }), 400
+        }), 404
 
 
 @mod.route('/signup', methods=['POST'])

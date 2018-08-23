@@ -20,11 +20,11 @@ The pages do not need much to be viewed as any web browser can view them from [t
 
 * Clone the project into your local repository using this command:
 
-`git clone https://github.com/BarnaTB/StackOverflow-lite.git`
+`git clone https://github.com/BarnaTB/StackOverflow-lite-db.git`
 
 * Change directory to the cloned folder using the following command for Windows, Linux and MacOS
 
-`cd StackOverflow-lite`
+`cd StackOverflow-lite-db`
 
 * Switch to the ch-test-endpoints branch
 
@@ -76,15 +76,24 @@ The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-
 * Fetch a single question
 * Fetch all questions
 * Post an answer
+* Delete a question
+* Mark an answer as preferred
+* Register a user
+* Login a user
 
 ## Endpoints
 
 HTTP Method|Endpoint|Functionality
 -----------|--------|-------------
-POST|api/v1/questions|Create a question
-GET|api/v1/questions/questionId|Fetch a specific question
-GET|api/v1/questions|Fetch all questions
+POST|/signup|Register a user
+POST|/login|Login a user
+POST|/questions|Create a question
+POST|/questions/int:questionId|Delete a question
+GET|/questions/questionId|Fetch a specific question
+GET|/questions|Fetch all questions
+GET|/questions|Fetch all a specific user's questions
 POST|/questions/questionId/answers|Add an answer
+PUT|/questions/questionId/answers/answerId|Add an answer
 
 ## Tools Used
 
@@ -100,6 +109,7 @@ The project has been built with the following technologies so far:
 * CSS
 * Javascript
 * Python/Flask
+* PostgreSQL
 
 ## Contributions
 
