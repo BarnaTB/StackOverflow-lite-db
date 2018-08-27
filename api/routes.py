@@ -4,12 +4,17 @@ import json
 from api.models import Answer, Question, User, questions, users, answers
 from flask import Blueprint
 import re
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from api.db import DbConnection
+
+db = DbConnection()
 
 
 mod = Blueprint('questions', __name__)
 
 
 @mod.route('/questions', methods=['POST'])
+@jwt_required
 def add_question():
     """
     Function enables user to create a question by first checking if they have
@@ -20,26 +25,53 @@ def add_question():
     """
     data = request.get_json()
 
-    questionId = len(questions)
-    questionId += 1
-
     details = data.get('details')
 
     if not details or details.isspace():
         return jsonify({
             "message": "Sorry, you didn't enter any question!"
         }), 400
-    question = Question(questionId, details)
-    questions.append(question)
+    userId = get_jwt_identity()
+    question = Question(user_id, details)
+    db.insert_question(user_id, details)
+    # questions.append(question)
 
     return jsonify({
-        "id": questionId,
+        # "id": db.fetch_questionId(details),
         "question": question.__dict__,
         "message": "Question added successfully!"
     }), 201
 
 
+@mod.route('/questions', methods=['GET'])
+@jwt_required
+def get_all_questions():
+    """
+    Function enables a user to fetch all questions on the platform by checking
+    if the length of the questions list is not zero, in which case it returns
+    an error message telling the user there are no questions in the list yet
+    else, it returns all the questions in the list of questions on the
+    platform.
+    """
+    user_id = get_jwt_identity()
+
+    if Question.fetch_all_questions() is None:
+        return jsonify({
+            'message': 'Sorry there are no questions yet!'
+        }), 404
+    questions = db.fetch_questions(user_id)
+    if questions:
+        return jsonify({
+            'Questions': questions,
+            'message': 'Questions fetched successfully!'
+        }), 200
+    return jsonify({
+        'message': 'There are no questions for this user yet!'
+    }), 404
+
+
 @mod.route('/questions/<int:questionId>/answers', methods=['POST'])
+@jwt_required
 def add_answer(questionId):
     """
     Function enables user to add an answer to a question on the platform.
@@ -57,6 +89,9 @@ def add_answer(questionId):
     data = request.get_json()
 
     details = data.get('details')
+    answerId = len(answers)
+
+    answerId += 1
 
     try:
         if not details or details.isspace():
@@ -69,7 +104,7 @@ def add_answer(questionId):
             }), 400
 
         question = questions[questionId - 1]
-        answer = Answer(questionId, details)
+        answer = Answer(questionId, answerId, details)
         answers.append(answer)
 
         return jsonify({
@@ -80,10 +115,11 @@ def add_answer(questionId):
     except IndexError:
         return jsonify({
             'message': 'Question does not exist.'
-        }), 400
+        }), 404
 
 
 @mod.route('/questions/<int:questionId>', methods=['GET'])
+@jwt_required
 def get_one_question(questionId):
     """
     Function enables a user to fetch a single question from the platform
@@ -115,26 +151,8 @@ def get_one_question(questionId):
         }), 404
 
 
-@mod.route('/questions', methods=['GET'])
-def get_all_questions():
-    """
-    Function enables a user to fetch all questions on the platform by checking
-    if the length of the questions list is not zero, in which case it returns
-    an error message telling the user there are no questions in the list yet
-    else, it returns all the questions in the list of questions on the
-    platform.
-    """
-    if len(questions) == 0:
-        return jsonify({
-            'message': 'Sorry there are no questions yet!'
-        }), 400
-    return jsonify({
-        'Questions': [question.__dict__ for question in questions],
-        'message': 'Questions fetched successfully!'
-    }), 200
-
-
 @mod.route('/questions/<int:questionId>', methods=['DELETE'])
+@jwt_required
 def delete_question(questionId):
     try:
         if len(questions) == 0:
@@ -169,9 +187,6 @@ def register():
 
     userId = uuid.uuid4()
 
-    user_id = len(users)
-    user_id += 1
-
     if not username or username.isspace():
         return jsonify({
             'message': 'Sorry, you did not enter your username!'
@@ -190,19 +205,31 @@ def register():
             'message': 'Invalid email address!'
         }), 400
     # source: https://docs.python.org/2/howto/regex.html
-    if not re.match(r"[A-Z, a-z, 0-9, @#]", password):
+    low = re.search(r"[a-z]", password)
+    up = re.search(r"[A-Z]", password)
+    num = re.search(r"[0-9]", password)
+    if not all((low, up, num)):
         return jsonify({
-            'message': 'Include at least one of each of these characters(A-Za-z0-9@#)'
+            'message': 'Include at least one of each of these characters(A-Za-z0-9)'
         }), 400
     if len(password) < 6:
         return jsonify({
             'message': 'Passwords should be at least 6 characters long!'
         }), 400
-    user = User(user_id, username, email, password)
+    if db.fetch_username(username):
+        return jsonify({
+            'message': 'Sorry, that username is registered to another user!'
+        }), 400
+    if db.fetch_user_email(email):
+        return jsonify({
+            'message': 'Sorry, that email is registered to another user!'
+        }), 400
+    user = User(userId, username, email, password)
+    # hashed_password = user.generate_hash()
+    db.insert_user(userId, username, email, password)
     users.append(user)
 
     return jsonify({
-        'User id': user_id,
         'Username': user.username,
         'message': '{} has registered successfully'.format(username)
     }), 400
@@ -227,6 +254,17 @@ def login():
         return jsonify({
             'message': 'You did not enter your password!'
         }), 400
+    if not db.fetch_username(username):
+        return jsonify({
+            'message': 'Sorry, wrong username!'
+        }), 400
+    if not db.fetch_user_password(username):
+        return jsonify({
+            'message': 'Sorry, wrong password!'
+        }), 400
+    userId = db.fetch_userId(username)
+    access_token = create_access_token(userId)
     return jsonify({
+        'token': access_token,
         'message': '{} is logged in.'.format(username)
     }), 200
