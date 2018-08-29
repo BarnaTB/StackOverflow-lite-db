@@ -6,7 +6,10 @@ class DbConnection:
     try:
         def __init__(self):
             self.connection = psycopg2.connect(
-                "dbname='stackoverflow' user='postgres' password='##password' host='localhost' port='5432'"
+                """
+                dbname='stackoverflow' user='postgres' password='##password'
+                host='localhost' port='5432'
+                """
             )
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
@@ -69,21 +72,26 @@ class DbConnection:
         insert_question_command = """
         INSERT INTO questions (userId, details) VALUES(%s, %s);
         """
-        self.cursor.execute(insert_question_command, [user_id[0], details])
+        self.cursor.execute(
+            insert_question_command, [user_id[0], details]
+        )
 
-    def fetch_questionId(self, details):
-        fetch_questionId_command = """
-        SELECT questionId FROM questions WHERE details='{}'
-        """.format(details)
-        questionId = self.cursor.execute(fetch_questionId_command)
+    def fetch_question_by_id(self, question_id):
+        fetch_question_id_command = """
+        SELECT * FROM questions WHERE questionid='{}'
+        """.format(question_id)
+        self.cursor.execute(fetch_question_id_command)
+        question = self.cursor.fetchall()
 
-        return questionId
+        return question
 
     def fetch_questions(self, user_id):
         fetch_questions_command = """
         SELECT * FROM questions WHERE userid=%s
         """
-        self.cursor.execute(fetch_questions_command, [user_id[0]])
+        self.cursor.execute(
+            fetch_questions_command, [user_id[0]]
+        )
         questions = self.cursor.fetchall()
 
         return questions
@@ -97,35 +105,52 @@ class DbConnection:
 
         return questions
 
-    def fetch_user_questions(self, userId):
+    def fetch_user_questions(self, user_id, question_id):
         fetch_questions_command = """
-        SELECT * FROM questions WHERE userId='{}';
-        """.format(userId)
-        self.cursor.execute(fetch_questions_command)
+        SELECT * FROM questions WHERE userid=%s AND questionid=%s;
+        """
+        self.cursor.execute(
+            fetch_questions_command, [user_id[0], question_id]
+        )
         qns = self.cursor.fetchall()
 
         return qns
 
-    def fetch_one_question(self, userId, questionId):
+    def fetch_one_user_question(self, user_id, question_id):
         fetch_one_question_command = """
-        SELECT userId, questionId, question.details, answer.details FROM question, answer WHERE userId='{}' AND answer.questionId='{}';
-        """.format(userId, questionId)
-        self.cursor.execute(fetch_one_question_command)
+        SELECT * FROM questions WHERE userid=%s AND questionid=%s;
+        """
+        self.cursor.execute(
+            fetch_one_question_command, [user_id[0], question_id]
+        )
         qn = self.cursor.fetchall()
 
         return qn
 
-    def delete_question(self, userId, questionId):
+    def delete_question(self, user_id, question_id):
         delete_question_command = """
-        DELETE FROM questions WHERE userId='{}' AND questionId='{}';
-        """.format(userId, questionId)
-        self.cursor.execute(delete_question_command)
+        DELETE FROM questions WHERE userid=%s AND questionid=%s;
+        """
+        self.cursor.execute(
+            delete_question_command, [user_id[0], question_id]
+        )
 
-    def insert_answer(self, userId, questionId, details):
+    def insert_answer(self, user_id, question_id, details):
         insert_answer_command = """
-        INSERT INTO answers(userId, questionId, details) VALUES('{}', '{}', '{}');
-        """.format(userId, questionId, details)
-        self.cursor.execute(insert_answer_command)
+        INSERT INTO answers(userid, questionid, details) VALUES(%s, %s, %s);
+        """
+        self.cursor.execute(
+            insert_answer_command, [user_id[0], question_id, details]
+        )
+
+    def fetch_answers_by_question_id(self, question_id):
+        fetch_answer_command = """
+        SELECT * FROM answers WHERE questionid='{}'
+        """.format(question_id)
+        self.cursor.execute(fetch_answer_command)
+        ans = self.cursor.fetchall()
+
+        return ans
 
     def delete_answer(self, userId, questionId):
         delete_answer_command = """
@@ -135,6 +160,14 @@ class DbConnection:
 
     def prefer_answer(self, userId, questionId):
         prefer_answer_command = """
-        UPDATE answers SET preference='Preferred' WHERE userId='{}' AND questionId='{}';
-        """.format(userId, questionId)
-        self.cursor.execute(prefer_answer_command)
+        UPDATE answers SET preference='Preferred'\
+        WHERE userid=%s AND questionid=%s;
+        """
+        self.cursor.execute(prefer_answer_command, [userId[0], questionId])
+
+    def update_question(self, user_id, question_id, details):
+        update_question_command = """
+        UPDATE questions SET details=%s\
+        WHERE user_id=%s AND question_id=%s;
+        """
+        self.cursor.execute(update_question_command, [details, user_id[0], question_id])

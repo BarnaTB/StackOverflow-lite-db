@@ -27,8 +27,8 @@ class User:
 
 
 class Question:
-    def __init__(self, userId, details):
-        self.userId = userId
+    def __init__(self, user_id, details):
+        self.user_id = user_id
         # self.questionId = questionId
         self.details = details
 
@@ -39,9 +39,53 @@ class Question:
             return None
         return qn
 
+    @staticmethod
+    def fetch_one_user_question(user_id, question_id):
+        qn = db.fetch_one_user_question(user_id, question_id)
+        if qn is None:
+            return None
+        return qn
+
+    @staticmethod
+    def fetch_answers(question_id):
+        ans = db.fetch_answers_by_question_id(question_id)
+        if ans is None:
+            return False
+        return ans
+
+    @staticmethod
+    def fetch_question_by_id(question_id):
+        qn = db.fetch_question_by_id(question_id)
+        if qn is None:
+            return None
+        return qn
+
+    @staticmethod
+    def fetch_user_questions(user_id, question_id):
+        qns = db.fetch_user_questions(user_id, question_id)
+        if qns is None:
+            return None
+        return qns
+
+    def update_question(self, question_id, details):
+        db.update_question(self.user_id, question_id, details)
+
+        qn = db.fetch_user_questions(self.user_id, question_id)
+
+        return qn
+
 
 class Answer:
-    def __init__(self, questionId, answerId, details):
-        self.answerId = answerId
-        self.questionId = questionId
+    def __init__(self, user_id, question_id, answer_id, details):
+        self.answerId = answer_id
+        self.question_id = question_id
         self.details = details
+        self.user_id = user_id
+        self.accepted = False
+
+    @staticmethod
+    def fetch_answers(question_id):
+        ans = db.fetch_answers_by_question_id(question_id)
+        if ans is None:
+            return None
+        return ans

@@ -4,7 +4,8 @@ import json
 from api.models import Answer, Question, User, questions, users, answers
 from flask import Blueprint
 import re
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from api.db import DbConnection
 
 db = DbConnection()
@@ -31,13 +32,11 @@ def add_question():
         return jsonify({
             "message": "Sorry, you didn't enter any question!"
         }), 400
-    userId = get_jwt_identity()
+    user_id = get_jwt_identity()
     question = Question(user_id, details)
     db.insert_question(user_id, details)
-    # questions.append(question)
 
     return jsonify({
-        # "id": db.fetch_questionId(details),
         "question": question.__dict__,
         "message": "Question added successfully!"
     }), 201
@@ -70,9 +69,48 @@ def get_all_questions():
     }), 404
 
 
-@mod.route('/questions/<int:questionId>/answers', methods=['POST'])
+@mod.route('/questions/<int:question_id>', methods=['GET'])
 @jwt_required
-def add_answer(questionId):
+def get_one_question(question_id):
+    """
+    Function enables a user to fetch a single question from the platform
+    using the questionId by checking if that id corresponds to any
+    question in the list in which case it returns a success message
+    with the question that has been fetched. In a case where the question
+    id does not match, an error message is returned stating that the
+    question does not exist.
+
+    :param questionId:
+    Parameter holds an integer value of the question id which is the id
+    of the question that the user user to fetch.
+    """
+    user_id = get_jwt_identity()
+    qn = Question.fetch_one_user_question(user_id, question_id)
+    ans = Question.fetch_answers(question_id)
+    if qn:
+        question = {}
+        question['user_id'] = qn[0][0]
+        question['question_id'] = qn[0][1]
+        question['details'] = qn[0][2]
+        if not ans:
+            return jsonify({
+                'Answers': 'Sorry, this question has no answers yet!',
+                'Question': question,
+                'Message': 'Question fetched successfully!'
+            }), 200
+        return jsonify({
+            'Answer': ans,
+            'Question': question,
+            'Message': 'Question and answers fetched successfully!'
+        })
+    return jsonify({
+            'message': 'Sorry, that question does not exist!'
+        }), 400
+
+
+@mod.route('/questions/<int:question_id>/answers', methods=['POST'])
+@jwt_required
+def add_answer(question_id):
     """
     Function enables user to add an answer to a question on the platform.
     Checks if there is an empty string and returns a message telling the
@@ -89,86 +127,149 @@ def add_answer(questionId):
     data = request.get_json()
 
     details = data.get('details')
-    answerId = len(answers)
 
-    answerId += 1
+    user_id = get_jwt_identity()
+    if not details or details.isspace():
+        return jsonify({
+            'message': 'Sorry, you did not enter any answer!'
+        }), 400
+    questions = Question.fetch_all_questions()
+    if len(questions) == 0:
+        return jsonify({
+            'message': 'Sorry, there are no questions yet!!'
+        }), 400
 
-    try:
-        if not details or details.isspace():
-            return jsonify({
-                'message': 'Sorry, you did not enter any answer!'
-            }), 400
-        if len(questions) == 0:
-            return jsonify({
-                'message': 'Sorry, there are no questions yet!!'
-            }), 400
+    qn = Question.fetch_question_id(question_id)
+    if qn:
+        question = {}
+        question['userid'] = qn[0][0]
+        question['questionid'] = qn[0][1]
+        question['details'] = qn[0][2]
 
-        question = questions[questionId - 1]
-        answer = Answer(questionId, answerId, details)
-        answers.append(answer)
+        db.insert_answer(user_id, question_id, details)
 
         return jsonify({
-            'Question': question.__dict__,
-            'Answer': answer.__dict__,
+            'Question': question,
+            'Answer': details,
             'Message': 'Answer added succesfully!'
         }), 201
-    except IndexError:
-        return jsonify({
-            'message': 'Question does not exist.'
-        }), 404
+    return jsonify({
+        'message': 'Sorry, this question does not exist!'
+    }), 404
 
 
-@mod.route('/questions/<int:questionId>', methods=['GET'])
+@mod.route('/questions/<int:question_id>', methods=['DELETE'])
 @jwt_required
-def get_one_question(questionId):
+def delete_question(question_id):
     """
-    Function enables a user to fetch a single question from the platform
-    using the questionId by checking if that id corresponds to any
-    question in the list in which case it returns a success message
-    with the question that has been fetched. In a case where the question
-    id does not match, an error message is returned stating that the
-    question does not exist.
+    Function enables a logged in user delete a question they created on the
+    platform. Checks if there are any questions in the database and returns
+    an appropriate error message if this is false, else checks that the user
+    is the creator of the question and if that question is existent in the
+    database and then the user is allowed to deleted the question.
 
-    :param questionId:
-    Parameter holds an integer value of the question id which is the id
-    of the question that the user user to fetch.
+    :param question_id:
+    This holds the integer value of the question that the user wishes to delete
+    from the database.
+
+    :returns:
+    A success message when the question is succesfully deleted.
     """
-    try:
-        if len(questions) < 0:
-            return jsonify({
-                'message': 'You have no questions yet.'
-            }), 400
-        question = questions[questionId - 1]
-        # ans = filter(lambda a: a['questionId'] == questionId, answers)
+    user_id = get_jwt_identity()
+    questions = Question.fetch_all_questions()
+    if len(questions) == 0:
         return jsonify({
-            'Answers': [answer.__dict__ for answer in answers if answer.questionId == questionId],
-            'Question': question.__dict__,
-            'Message': 'Question fetched successfully!'
+            'message': 'There are no questions to delete!'
+        }), 400
+    question = Question.fetch_question_by_id(question_id)
+    questions = Question.fetch_user_questions(user_id, question_id)
+    if questions:
+        db.delete_question(user_id, question_id)
+        return jsonify({
+            'message': 'Question deleted!'
         }), 200
-    except IndexError:
+    if question:
         return jsonify({
-            'message': 'Question does not exist.'
-        }), 404
+            'message': 'Sorry, you cannot delete a question that does not\
+            belong to you!'
+        }), 400
+    return jsonify({
+        'message': 'Sorry, this question does not exist!'
+    }), 404
 
 
-@mod.route('/questions/<int:questionId>', methods=['DELETE'])
+@mod.route('/<int:question_id>', methods=['PUT'])
 @jwt_required
-def delete_question(questionId):
-    try:
-        if len(questions) == 0:
-            return jsonify({
-                'message': 'There are no questions to delete!'
-            }), 400
-        for question in questions:
-            if questionId == question.questionId:
-                questions.remove(question)
-                return jsonify({
-                    'message': 'Question deleted!'
-                }), 200
-    except IndexError:
+def modify_question(question_id):
+    data = request.get_json()
+
+    details = data.get('details')
+
+    user_id = get_jwt_identity()
+
+    if not details or details.isspace():
         return jsonify({
-            'message': 'Question does not exist.'
+            "message": "Sorry, you didn't enter any question!"
+        }), 400
+    qn = Question(user_id, details)
+    question = Question.fetch_question_by_id(question_id)
+    questions = Question.fetch_user_questions(user_id, question_id)
+    # qn = Question.fetch_one_user_question(user_id, question_id)
+    # db.insert_question(user_id, details)
+    if questions:
+        if question:
+            updated_question = qn.update_question(question_id, details)
+            dict_question = {}
+            dict_question['userid'] = updated_question[0][0]
+            dict_question['questionid'] = updated_question[0][1]
+            dict_question['details'] = updated_question[0][2]
+            return jsonify({
+                "question": dict_question,
+                "message": "Question added successfully!"
+            }), 201
+        return jsonify({
+            'message': 'Sorry, this question does not exist!'
         }), 404
+    return jsonify({
+        'message': 'Sorry, you have no questions to modify!'
+    }), 404
+
+
+@mod.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
+def accept_answer(question_id, answer_id):
+    data = request.get_json()
+
+    accepted = data.get('accepted')
+
+    user_id = get_jwt_identity()
+
+    if not accepted or accepted .isspace():
+        return jsonify({
+            "message": "Sorry, you didn't enter any question!"
+        }), 400
+    qn = Question(user_id, accepted)
+    question = Question.fetch_question_by_id(question_id)
+    questions = Question.fetch_user_questions(user_id, question_id)
+    # qn = Question.fetch_one_user_question(user_id, question_id)
+    # db.insert_question(user_id, details)
+    if questions:
+        if question:
+            updated_question = qn.update_question(question_id, details)
+            dict_question = {}
+            dict_question['userid'] = updated_question[0][0]
+            dict_question['questionid'] = updated_question[0][1]
+            dict_question['details'] = updated_question[0][2]
+            return jsonify({
+                "question": dict_question,
+                "message": "Question added successfully!"
+            }), 201
+        return jsonify({
+            'message': 'Sorry, this question does not exist!'
+        }), 404
+    return jsonify({
+        'message': 'Sorry, you have no questions to modify!'
+    }), 404
+
 
 
 @mod.route('/signup', methods=['POST'])
@@ -210,7 +311,8 @@ def register():
     num = re.search(r"[0-9]", password)
     if not all((low, up, num)):
         return jsonify({
-            'message': 'Include at least one of each of these characters(A-Za-z0-9)'
+            'message': 'Include at least one of each of\
+            these characters(A-Za-z0-9)'
         }), 400
     if len(password) < 6:
         return jsonify({
@@ -225,7 +327,7 @@ def register():
             'message': 'Sorry, that email is registered to another user!'
         }), 400
     user = User(userId, username, email, password)
-    # hashed_password = user.generate_hash()
+    # hashed_password = generate_password_hash(password)
     db.insert_user(userId, username, email, password)
     users.append(user)
 
