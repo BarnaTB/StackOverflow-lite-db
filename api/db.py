@@ -13,6 +13,28 @@ class DbConnection:
             )
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
+            create_user_table_command = """
+            CREATE TABLE IF NOT EXISTS users\
+            (userid UUID NOT NULL PRIMARY KEY, username TEXT NOT NULL,\
+            email TEXT NOT NULL, password TEXT NOT NULL)
+            """
+            self.cursor.execute(create_user_table_command)
+
+            create_questions_table_command = """
+            CREATE TABLE IF NOT EXISTS questions\
+            (userid TEXT NOT NULL, questionid SERIAL PRIMARY KEY,\
+            details TEXT NOT NULL);
+            """
+            self.cursor.execute(create_questions_table_command)
+
+            create_answers_table_command = """
+            CREATE TABLE IF NOT EXISTS answers\
+            (userid TEXT NOT NULL, questionid INTEGER NOT NULL,\
+            answerid SERIAL PRIMARY KEY, details TEXT NOT NULL,\
+             accepted BOOL DEFAULT FALSE);
+            """
+            self.cursor.execute(create_answers_table_command)
+
             pprint("Connected!")
     except:
         pprint('Failed to connect to database')
@@ -127,6 +149,17 @@ class DbConnection:
 
         return qn
 
+    def fetch_user_question(self, user_id, question_id):
+        fetch_user_question_command = """
+        SELECT * FROM questions WHERE userid=%s AND questionid=%s;
+        """
+        self.cursor.execute(
+            fetch_user_question_command, [user_id, question_id]
+            )
+        qn = self.cursor.fetchone()
+
+        return qn
+
     def delete_question(self, user_id, question_id):
         delete_question_command = """
         DELETE FROM questions WHERE userid=%s AND questionid=%s;
@@ -158,16 +191,20 @@ class DbConnection:
         """.format(userId, questionId)
         self.cursor.execute(delete_answer_command)
 
-    def prefer_answer(self, userId, questionId):
+    def accept_answer(self, question_id, answer_id, accepted):
         prefer_answer_command = """
-        UPDATE answers SET preference='Preferred'\
-        WHERE userid=%s AND questionid=%s;
+        UPDATE answers SET accepted=%s\
+        WHERE questionid=%s AND answerid=%s;
         """
-        self.cursor.execute(prefer_answer_command, [userId[0], questionId])
+        self.cursor.execute(
+            prefer_answer_command, [accepted, question_id, answer_id]
+            )
 
     def update_question(self, user_id, question_id, details):
         update_question_command = """
         UPDATE questions SET details=%s\
-        WHERE user_id=%s AND question_id=%s;
+        WHERE userid=%s AND questionid=%s;
         """
-        self.cursor.execute(update_question_command, [details, user_id[0], question_id])
+        self.cursor.execute(
+            update_question_command, [details, user_id[0], question_id]
+            )

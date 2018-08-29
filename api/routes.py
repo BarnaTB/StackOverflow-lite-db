@@ -99,7 +99,7 @@ def get_one_question(question_id):
                 'Message': 'Question fetched successfully!'
             }), 200
         return jsonify({
-            'Answer': ans,
+            'Answers': ans,
             'Question': question,
             'Message': 'Question and answers fetched successfully!'
         })
@@ -139,7 +139,7 @@ def add_answer(question_id):
             'message': 'Sorry, there are no questions yet!!'
         }), 400
 
-    qn = Question.fetch_question_id(question_id)
+    qn = Question.fetch_question_by_id(question_id)
     if qn:
         question = {}
         question['userid'] = qn[0][0]
@@ -158,7 +158,7 @@ def add_answer(question_id):
     }), 404
 
 
-@mod.route('/questions/<int:question_id>', methods=['DELETE'])
+@mod.route('/<int:question_id>', methods=['DELETE'])
 @jwt_required
 def delete_question(question_id):
     """
@@ -236,40 +236,37 @@ def modify_question(question_id):
 
 
 @mod.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
+@jwt_required
 def accept_answer(question_id, answer_id):
     data = request.get_json()
 
     accepted = data.get('accepted')
 
     user_id = get_jwt_identity()
-
-    if not accepted or accepted .isspace():
-        return jsonify({
-            "message": "Sorry, you didn't enter any question!"
-        }), 400
-    qn = Question(user_id, accepted)
-    question = Question.fetch_question_by_id(question_id)
-    questions = Question.fetch_user_questions(user_id, question_id)
-    # qn = Question.fetch_one_user_question(user_id, question_id)
-    # db.insert_question(user_id, details)
-    if questions:
-        if question:
-            updated_question = qn.update_question(question_id, details)
-            dict_question = {}
-            dict_question['userid'] = updated_question[0][0]
-            dict_question['questionid'] = updated_question[0][1]
-            dict_question['details'] = updated_question[0][2]
+    qn = Question.fetch_user_questions(user_id, question_id)
+    ans = Question.fetch_answers(question_id)
+    if qn:
+        question = {}
+        question['user_id'] = qn[0][0]
+        question['question_id'] = qn[0][1]
+        question['details'] = qn[0][2]
+        if not ans:
             return jsonify({
-                "question": dict_question,
-                "message": "Question added successfully!"
-            }), 201
+                'Answers': 'Sorry, this question has no answers yet!',
+                'Question': question,
+                'Message': 'Answers to this question were not found!'
+            }), 404
+        db.accept_answer(question_id, answer_id, accepted)
+        accepted_answer = Answer.fetch_answers(question_id)
         return jsonify({
-            'message': 'Sorry, this question does not exist!'
-        }), 404
-    return jsonify({
-        'message': 'Sorry, you have no questions to modify!'
-    }), 404
-
+            'Answer': accepted_answer,
+            'Question': question,
+            'Message': 'Answer updated successfully!'
+        }), 200
+    else:
+        return jsonify({
+                'message': 'Sorry, that question does not exist!'
+            }), 404
 
 
 @mod.route('/signup', methods=['POST'])
@@ -286,7 +283,7 @@ def register():
     email = data.get('email')
     password = data.get('password')
 
-    userId = uuid.uuid4()
+    user_id = uuid.uuid4()
 
     if not username or username.isspace():
         return jsonify({
@@ -311,8 +308,8 @@ def register():
     num = re.search(r"[0-9]", password)
     if not all((low, up, num)):
         return jsonify({
-            'message': 'Include at least one of each of\
-            these characters(A-Za-z0-9)'
+            'message': 'Passwords should include lower case,\
+upper case and numbers'
         }), 400
     if len(password) < 6:
         return jsonify({
@@ -326,9 +323,9 @@ def register():
         return jsonify({
             'message': 'Sorry, that email is registered to another user!'
         }), 400
-    user = User(userId, username, email, password)
+    user = User(user_id, username, email, password)
     # hashed_password = generate_password_hash(password)
-    db.insert_user(userId, username, email, password)
+    db.insert_user(user_id, username, email, password)
     users.append(user)
 
     return jsonify({
