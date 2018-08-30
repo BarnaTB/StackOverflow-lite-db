@@ -52,9 +52,13 @@ and for Linux and MacOS
 
 ## Running the tests
 
-* If you don't have pytest installed, run the following command while the virtual environment is active
+* If you don't have pytest installed, run the following command in your virtual environment:
 
 `pip install pytest`
+
+* Source the .env file using:
+
+`source .env`
 
 * Run the tests.
 
@@ -64,20 +68,9 @@ and for Linux and MacOS
 
 The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-lite/) and the python app is hosted on [heroku](https://stackoverflow-lite1.herokuapp.com/). They, however, have only been tested with Google Chrome and Mozilla Firefox so **no** assurance of perfomance in any other browser can be given.
 
-## Features
-
-* Post a question
-* Fetch a single question
-* Fetch all questions
-* Post an answer
-* Delete a question
-* Mark an answer as preferred
-* Register a user
-* Login a user
-
 ## Endpoints
 
-HTTP Method|Endpoint|Functionality
+HTTP Method|Endpoint|Functionality|Parameters|Protected|
 -----------|--------|-------------
 POST|/signup|Register a user
 POST|/login|Login a user

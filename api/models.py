@@ -1,14 +1,15 @@
-from api.db import DbConnection
 from flask import jsonify
 import re
 from passlib.hash import pbkdf2_sha256 as sha256
-from api.db import DbConnection
+from ..db import DbConnection
+
 
 users = []
 questions = []
 answers = []
 
-db=DbConnection()
+db = DbConnection()
+
 
 class User:
     def __init__(self, userId, username, email, password):

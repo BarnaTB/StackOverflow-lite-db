@@ -24,15 +24,15 @@ class DbConnection:
 
             create_questions_table_command = """
             CREATE TABLE IF NOT EXISTS questions\
-            (userid TEXT NOT NULL, questionid SERIAL PRIMARY KEY,\
-            details TEXT NOT NULL);
+            (userid INTEGER NOT NULL, questionid SERIAL PRIMARY KEY,\
+            question TEXT NOT NULL);
             """
             self.cursor.execute(create_questions_table_command)
 
             create_answers_table_command = """
             CREATE TABLE IF NOT EXISTS answers\
-            (userid TEXT NOT NULL, questionid INTEGER NOT NULL,\
-            answerid SERIAL PRIMARY KEY, details TEXT NOT NULL,\
+            (userid INTEGER NOT NULL, questionid INTEGER NOT NULL,\
+            answerid SERIAL PRIMARY KEY, answer TEXT NOT NULL,\
              accepted BOOL DEFAULT FALSE);
             """
             self.cursor.execute(create_answers_table_command)
@@ -114,9 +114,7 @@ class DbConnection:
         fetch_questions_command = """
         SELECT * FROM questions WHERE userid=%s
         """
-        self.cursor.execute(
-            fetch_questions_command, [user_id[0]]
-        )
+        self.cursor.execute(fetch_questions_command, [user_id[0]])
         questions = self.cursor.fetchall()
 
         return questions
@@ -157,7 +155,7 @@ class DbConnection:
         SELECT * FROM questions WHERE userid=%s AND questionid=%s;
         """
         self.cursor.execute(
-            fetch_user_question_command, [user_id, question_id]
+            fetch_user_question_command, [user_id[0], question_id]
             )
         qn = self.cursor.fetchone()
 

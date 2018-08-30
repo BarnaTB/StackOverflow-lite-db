@@ -6,7 +6,7 @@ from flask import Blueprint
 import re
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from flask_jwt_extended import jwt_required
-from api.db import DbConnection
+from .db import DbConnection
 
 
 db = DbConnection()
@@ -27,18 +27,17 @@ def add_question():
     """
     data = request.get_json()
 
-    details = data.get('details')
+    question = data.get('question')
 
-    if not details or details.isspace():
+    if not question or question.isspace():
         return jsonify({
             "message": "Sorry, you didn't enter any question!"
         }), 400
     user_id = get_jwt_identity()
-    question = Question(user_id, details)
-    db.insert_question(user_id, details)
+    db.insert_question(user_id, question)
 
     return jsonify({
-        "question": question.__dict__,
+        "question": question,
         "message": "Question added successfully!"
     }), 201
 
@@ -61,10 +60,14 @@ def get_all_questions():
         }), 404
     questions = db.fetch_questions(user_id)
     if questions:
-        return jsonify({
-            'Questions': questions,
-            'message': 'Questions fetched successfully!'
-        }), 200
+        for question in questions:
+            question_dict = {}
+            question_dict['questionid'] = question[1]
+            question_dict['question'] = question[2]
+            return jsonify({
+                'Questions': question_dict,
+                'message': 'Questions fetched successfully!'
+            }), 200
     return jsonify({
         'message': 'There are no questions for this user yet!'
     }), 404
@@ -90,7 +93,6 @@ def get_one_question(question_id):
     ans = Question.fetch_answers(question_id)
     if qn:
         question = {}
-        question['user_id'] = qn[0][0]
         question['question_id'] = qn[0][1]
         question['details'] = qn[0][2]
         if not ans:
@@ -99,11 +101,16 @@ def get_one_question(question_id):
                 'Question': question,
                 'Message': 'Question fetched successfully!'
             }), 200
-        return jsonify({
-            'Answers': ans,
-            'Question': question,
-            'Message': 'Question and answers fetched successfully!'
-        })
+        for answer in ans:
+            answer_dict = {}
+            answer['answerid'] = answer[2]
+            answer['answer'] = answer[3]
+            answer['accepted'] = answer[4]
+            return jsonify({
+                'Answers': answer_dict,
+                'Question': question,
+                'Message': 'Question and answers fetched successfully!'
+            })
     return jsonify({
             'message': 'Sorry, that question does not exist!'
         }), 400
@@ -127,10 +134,10 @@ def add_answer(question_id):
     """
     data = request.get_json()
 
-    details = data.get('details')
+    answer = data.get('answer')
 
     user_id = get_jwt_identity()
-    if not details or details.isspace():
+    if not answer or answer.isspace():
         return jsonify({
             'message': 'Sorry, you did not enter any answer!'
         }), 400
@@ -151,7 +158,7 @@ def add_answer(question_id):
 
         return jsonify({
             'Question': question,
-            'Answer': details,
+            'Answer': answer,
             'Message': 'Answer added succesfully!'
         }), 201
     return jsonify({
@@ -184,15 +191,20 @@ def delete_question(question_id):
         }), 400
     question = Question.fetch_question_by_id(question_id)
     questions = Question.fetch_user_questions(user_id, question_id)
+    answers = Answer.fetch_answers(question_id)
     if questions:
         db.delete_question(user_id, question_id)
+        if answers:
+            return jsonify({
+                'message': 'Question and answers deleted!'
+            }), 200
         return jsonify({
             'message': 'Question deleted!'
         }), 200
     if question:
         return jsonify({
-            'message': 'Sorry, you cannot delete a question that does not\
-            belong to you!'
+            'message': 'Sorry, you cannot delete a question that does not \
+belong to you!'
         }), 400
     return jsonify({
         'message': 'Sorry, this question does not exist!'
@@ -215,8 +227,6 @@ def modify_question(question_id):
     qn = Question(user_id, details)
     question = Question.fetch_question_by_id(question_id)
     questions = Question.fetch_user_questions(user_id, question_id)
-    # qn = Question.fetch_one_user_question(user_id, question_id)
-    # db.insert_question(user_id, details)
     if questions:
         if question:
             updated_question = qn.update_question(question_id, details)

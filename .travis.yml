@@ -1,14 +1,18 @@
 language: python
 python:
   - "3.5"
-# command to install dependencies
+
 install:
   - "pip install -r requirements.txt"
 
+services:
+  - postgresql
 
-# command to run tests
+before-script:
+  - psql -c 'CREATE DATABASE test_db;' -U postgres
+
 script:
-   - nosetests --with-coverage --cover-tests
+   - pytest -v --cov app
    - coverage report
 
 
