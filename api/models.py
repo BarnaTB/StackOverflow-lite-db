@@ -8,7 +8,7 @@ users = []
 questions = []
 answers = []
 
-db = DbConnection()
+db = DbConnection('postgresql://postgres:##password@localhost:5432/stackoverflow')
 
 
 class User:

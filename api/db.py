@@ -1,16 +1,21 @@
 import psycopg2
+from urllib.parse import urlparse
 from pprint import pprint
 
 
 class DbConnection:
     try:
-        def __init__(self):
+        def __init__(self, db_url):
+            parsed_url = urlparse(db_url)
+            db = parsed_url.path[1:]
+            username = parsed_url.username
+            hostname = parsed_url.hostname
+            password = parsed_url.password
+            port = parsed_url.port
+
             self.connection = psycopg2.connect(
-                """
-                dbname='stackoverflow' user='postgres' password='##password'
-                host='localhost' port='5432'
-                """
-            )
+                database=db, user=username, password=password,
+                host=hostname, port=port)
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
             create_user_table_command = """
@@ -208,3 +213,10 @@ class DbConnection:
         self.cursor.execute(
             update_question_command, [details, user_id[0], question_id]
             )
+
+    def truncate_table(self, table_name):
+        truncate_table_command = """
+        TRUNCATE TABLE %s RESTART INDENTITY;
+        """
+
+        self.cursor.execute(truncate_table_command, [table_name])

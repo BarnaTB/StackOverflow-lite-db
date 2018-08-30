@@ -1,11 +1,12 @@
 import unittest
-from api import app
+from api import create_app
 import json
-from api.models import *
+from api.models import User, Question, Answer
 
 
 class TestQuestions(unittest.TestCase):
     def setUp(self):
+        app = create_app('TESTING')
         self.tester = app.test_client(self)
 
     def test_add_question(self):
