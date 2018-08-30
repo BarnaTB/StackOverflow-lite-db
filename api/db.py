@@ -17,7 +17,7 @@ class DbConnection:
             self.cursor = self.connection.cursor()
             create_user_table_command = """
             CREATE TABLE IF NOT EXISTS users\
-            (userid UUID NOT NULL PRIMARY KEY, username TEXT NOT NULL,\
+            (userid SERIAL PRIMARY KEY, username TEXT NOT NULL,\
             email TEXT NOT NULL, password TEXT NOT NULL)
             """
             self.cursor.execute(create_user_table_command)
@@ -42,10 +42,10 @@ class DbConnection:
     except:
         pprint('Failed to connect to database')
 
-    def insert_user(self, userId, username, email, password):
+    def insert_user(self, username, email, password):
         insert_user_command = """
-        INSERT INTO users VALUES('{}', '{}', '{}', '{}');
-        """.format(userId, username, email, password)
+        INSERT INTO users(username, email, password) VALUES('{}', '{}', '{}');
+        """.format(username, email, password)
         self.cursor.execute(insert_user_command)
 
     def fetch_username(self, username):
