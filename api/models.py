@@ -8,8 +8,7 @@ users = []
 questions = []
 answers = []
 
-db = DbConnection('postgresql://postgres:##password@localhost:5432/stackoverflow')
-
+db=DbConnection()
 
 class User:
     def __init__(self, userId, username, email, password):

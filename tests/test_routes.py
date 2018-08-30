@@ -1,12 +1,13 @@
 import unittest
-from api import create_app
 import json
 from api.models import User, Question, Answer
+from api.db import DbConnection
+from api import app
 
 
 class TestQuestions(unittest.TestCase):
     def setUp(self):
-        app = create_app('TESTING')
+        app.config['TESTING'] = True
         self.tester = app.test_client(self)
 
     def test_add_question(self):
@@ -168,6 +169,12 @@ class TestQuestions(unittest.TestCase):
             self.assertEqual(
                 response['message'], 'There are no questions to delete!'
                 )
+
+    def tearDown(self):
+        db = DbConnection('postgresql://##password@localhost:5432/test_db')
+        # db.truncate_table('users')
+        db.truncate_table('questions')
+        # db.truncate_table('users')
 
 
 class TestAnswer(unittest.TestCase):
