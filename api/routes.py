@@ -284,8 +284,6 @@ def register():
     email = data.get('email')
     password = data.get('password')
 
-    user_id = uuid.uuid4()
-
     if not username or username.isspace():
         return jsonify({
             'message': 'Sorry, you did not enter your username!'
@@ -324,13 +322,12 @@ upper case and numbers'
         return jsonify({
             'message': 'Sorry, that email is registered to another user!'
         }), 400
-    user = User(user_id, username, email, password)
+    # user = User(user_id, username, email, password)
     # hashed_password = generate_password_hash(password)
-    db.insert_user(user_id, username, email, password)
-    users.append(user)
+    db.insert_user(username, email, password)
 
     return jsonify({
-        'Username': user.username,
+        'Username': username,
         'message': '{} has registered successfully'.format(username)
     }), 400
 
@@ -362,8 +359,8 @@ def login():
         return jsonify({
             'message': 'Sorry, wrong password!'
         }), 400
-    userId = db.fetch_userId(username)
-    access_token = create_access_token(userId)
+    user_id = db.fetch_userId(username)
+    access_token = create_access_token(user_id)
     return jsonify({
         'token': access_token,
         'message': '{} is logged in.'.format(username)
