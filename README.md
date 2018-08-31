@@ -1,5 +1,7 @@
 # StackOverflow-lite
 
+[![Build Status](https://travis-ci.org/BarnaTB/StackOverflow-lite-db.svg?branch=ft-api)](https://travis-ci.org/BarnaTB/StackOverflow-lite-db)
+
 StackOverflow-lite is a platform where people can ask questions and provide answers.
 
 ## Getting Started

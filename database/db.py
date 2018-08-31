@@ -4,43 +4,50 @@ from pprint import pprint
 
 
 class DbConnection:
-    try:
-        def __init__(self):
+    def __init__(self):
+        try:
             if os.getenv('APP_SETTINGS') == 'testing':
-                db = 'test_db'
-            db = 'stackoverflow'
-
+                self.db = 'test_db'
+            else:
+                self.db = 'stackoverflow'
             self.connection = psycopg2.connect(
-                database=db, user='postgres', password='##password',
+                database='{}'.format(self.db),
+                user='postgres', password='##password',
                 host='localhost', port='5432')
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
-            create_user_table_command = """
-            CREATE TABLE IF NOT EXISTS users\
-            (userid SERIAL PRIMARY KEY, username TEXT NOT NULL,\
-            email TEXT NOT NULL, password TEXT NOT NULL)
-            """
-            self.cursor.execute(create_user_table_command)
-
-            create_questions_table_command = """
-            CREATE TABLE IF NOT EXISTS questions\
-            (userid INTEGER NOT NULL, questionid SERIAL PRIMARY KEY,\
-            question TEXT NOT NULL);
-            """
-            self.cursor.execute(create_questions_table_command)
-
-            create_answers_table_command = """
-            CREATE TABLE IF NOT EXISTS answers\
-            (userid INTEGER NOT NULL, questionid INTEGER NOT NULL,\
-            answerid SERIAL PRIMARY KEY, answer TEXT NOT NULL,\
-             accepted BOOL DEFAULT FALSE);
-            """
-            self.cursor.execute(create_answers_table_command)
+            self.create_user_table()
+            self.create_questions_table()
+            self.create_answers_table()
 
             pprint("Connected!")
-            print(db)
-    except:
-        pprint('Failed to connect to database')
+        except:
+            pprint('Failed to connect to database')
+
+    def create_user_table(self):
+        create_user_table_command = """
+        CREATE TABLE IF NOT EXISTS users\
+        (userid SERIAL PRIMARY KEY, username TEXT NOT NULL,\
+        email TEXT NOT NULL, password TEXT NOT NULL)
+        """
+        self.cursor.execute(create_user_table_command)
+
+    def create_answers_table(self):
+        create_answers_table_command = """
+        CREATE TABLE IF NOT EXISTS answers\
+        (userid INTEGER NOT NULL, questionid INTEGER NOT NULL,\
+        answerid SERIAL PRIMARY KEY, answer TEXT NOT NULL,\
+        accepted BOOL DEFAULT FALSE);
+        """
+        self.cursor.execute(create_answers_table_command)
+
+    def create_questions_table(self):
+        create_questions_table_command = """
+        CREATE TABLE IF NOT EXISTS questions\
+        (userid INTEGER NOT NULL, questionid SERIAL PRIMARY KEY,\
+        question TEXT NOT NULL);
+        """
+        self.cursor.execute(create_questions_table_command)
 
     def insert_user(self, username, email, password):
         insert_user_command = """
@@ -214,5 +221,4 @@ class DbConnection:
         truncate_table_command = """
         TRUNCATE TABLE %s RESTART INDENTITY;
         """
-
         self.cursor.execute(truncate_table_command, [table_name])

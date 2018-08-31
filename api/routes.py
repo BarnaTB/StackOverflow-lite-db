@@ -6,7 +6,7 @@ from flask import Blueprint
 import re
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from flask_jwt_extended import jwt_required
-from .db import DbConnection
+from database.db import DbConnection
 
 
 db = DbConnection()

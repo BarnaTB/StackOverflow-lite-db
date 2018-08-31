@@ -8,7 +8,7 @@ class ModelsTests(unittest.TestCase):
         user = User('1', 'Barna', 'barna@gmail.com', '12345')
 
     def test_question_model(self):
-        question = Question('1', '2', 'what is coding?')
+        question = Question('1', 'what is coding?')
 
     def test_answer_model(self):
-        answer = Answer('1', '2', 'coding is obulamu')
+        answer = Answer('1', '2', '3', 'coding is obulamu')

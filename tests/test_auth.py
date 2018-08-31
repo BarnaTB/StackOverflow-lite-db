@@ -2,12 +2,46 @@ import unittest
 import json
 from api.models import User
 from api import app
+from database.db import DbConnection
 
 
 class TestUsers(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
+        self.db = DbConnection()
+        self.register_successfully()
         self.tester = app.test_client(self)
+
+    def register_successfully(self):
+        """Method to register test user"""
+        user = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
+
+        return response
+
+    def test_register_successfully(self):
+        """Method to test successful user registration"""
+        user = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
+
+        self.assertEqual(response.data, 'username has registered successfully')
 
     def test_registration_empty_username(self):
         user = dict(
@@ -251,3 +285,7 @@ class TestUsers(unittest.TestCase):
         reply = json.loads(response.data.decode())
 
         self.assertEqual(reply['message'], 'Barna is logged in.')
+
+    def tearDown(self):
+        # db = DbConnection()
+        self.db.truncate_table('users')

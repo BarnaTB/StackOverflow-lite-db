@@ -2,6 +2,7 @@ import unittest
 import json
 from api.models import Answer
 from api import app
+from database.db import DbConnection
 
 
 class TestAnswer(unittest.TestCase):
@@ -348,3 +349,7 @@ class TestUsers(unittest.TestCase):
         reply = json.loads(response.data.decode())
 
         self.assertEqual(reply['message'], 'Barna is logged in.')
+
+    def tearDown(self):
+        db = DbConnection()
+        db.truncate_table('answers')

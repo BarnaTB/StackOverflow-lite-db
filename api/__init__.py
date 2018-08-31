@@ -7,6 +7,7 @@ from flasgger import Swagger
 
 app = Flask(__name__)
 
+# app.config.from_object('config.')
 app.config['JWT_SECRET_KEY'] = 'my-kisumuluzo'
 app.register_blueprint(routes.mod, url_prefix='/api/v1')
 app.register_blueprint(routes.mod, url_prefix='/api/v1/auth')
