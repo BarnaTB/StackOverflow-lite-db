@@ -74,8 +74,8 @@ HTTP Method | Endpoint | Functionality | Parameters | Protected
 POST | /signup | Register a user| None | False
 POST | /login | Login a user | None | False
 POST | /questions | Create a question | None | True
-POST | /questions/int:question_id | Delete a question | questionId | True
-GET | /questions/questionId | Fetch a specific question | questionId | True
+POST | /questions/int:question_id | Delete a question | question_id | True
+GET | /questions/questionId | Fetch a specific question | question_id | True
 GET | /questions | Fetch all questions | None | True
 GET | /questions | Fetch all a specific user's questions | None | True
 POST | /questions/questionId/answers | Add an answer | question_id | True
