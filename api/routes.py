@@ -144,7 +144,7 @@ def add_answer(question_id):
     questions = Question.fetch_all_questions()
     if len(questions) == 0:
         return jsonify({
-            'message': 'Sorry, there are no questions yet!!'
+            'message': 'Sorry, there are no questions yet!'
         }), 400
 
     qn = Question.fetch_question_by_id(question_id)

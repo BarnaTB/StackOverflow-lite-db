@@ -8,332 +8,298 @@ from database.db import DbConnection
 class TestAnswer(unittest.TestCase):
     def setUp(self):
         self.tester = app.test_client(self)
+        self.db = DbConnection()
 
     def test_add_answer_without_question(self):
-        answer = dict(
-            details="my answer"
+        """Test that a user cannot add answer to non-existent question"""
+        user1 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
         )
 
         response = self.tester.post(
-            'api/v1/questions/1/answers',
+            'api/v1/auth/signup',
             content_type='application/json',
-            data=json.dumps(answer)
+            data=json.dumps(user1)
         )
 
-        if len(questions) == 0:
-            self.assertEqual(
-                response.status_code, 404
-                )
-            self.assertRaises(IndexError, response)
-
-    def test_add_answer_without_details(self):
-        question = dict(
-            details="my question"
-        )
-
-        answer = dict(
-            details=""
-        )
-
-        self.tester.post(
-            'api/v1/questions',
-            content_type='application/json',
-            data=json.dumps(question)
-        )
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
-            'api/v1/questions/1/answers',
+            'api/v1/login',
             content_type='application/json',
-            data=json.dumps(answer)
+            data=json.dumps(user1)
         )
 
-        self.assertEqual(
-            response.status_code, 400
-            )
+        reply = json.loads(response.data.decode())
 
-    def test_add_answer_with_both_answer_and_question_details(self):
-        question = dict(
-            details="my question"
-        )
+        token = reply['token']
+
+        self.assertEqual(reply['message'], 'barna is logged in.')
 
         answer = dict(
-            details="my answer"
-        )
-
-        self.tester.post(
-            'api/v1/questions',
-            content_type='application/json',
-            data=json.dumps(question)
-        )
-
-        response = self.tester.post(
-            'api/v1/questions/1/answers',
-            content_type='application/json',
-            data=json.dumps(answer)
-        )
-
-        self.assertEqual(
-            response.status_code, 201
-            )
-
-    def test_add_answer_to_question_which_does_not_exist(self):
-        question = dict(
-            details="my question"
-        )
-
-        answer = dict(
-            details="my answer"
-        )
-
-        self.tester.post(
-            'api/v1/questions',
-            content_type='application/json',
-            data=json.dumps(question)
+            answer=''
         )
 
         response = self.tester.post(
             'api/v1/questions/2/answers',
             content_type='application/json',
-            data=json.dumps(answer)
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
         )
-
-        if len(questions) == 1:
-            self.assertEqual(
-                response.status_code, 400
-                )
-
-
-class TestUsers(unittest.TestCase):
-    def setUp(self):
-        self.tester = app.test_client(self)
-
-    def test_registration_empty_username(self):
-        user = dict(
-            username="",
-            email="barna@gmail.com",
-            password="123456"
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
 
         self.assertEqual(
-            reply["message"], "Sorry, you did not enter your username!"
-            )
+            response.status_code, 400
+        )
 
-    def test_registration_spaces_entry(self):
-        user = dict(
-            username=" ",
-            email="barna@gmail.com",
-            password="123456"
+    def test_add_answer_without_details(self):
+        """Test user cannot add an empty answer"""
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
         )
 
         response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(
-            reply["message"], "Sorry, you did not enter your username!"
-            )
-
-    def test_registration_email_empty(self):
-        user = dict(
-            username="Barna",
-            email="",
-            password="123456"
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(
-            reply["message"], "Sorry, you did not enter your email!"
-            )
-
-    def test_registration_email_space_entry(self):
-        user = dict(
-            username="Barna",
-            email=" ",
-            password="123456"
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(reply["message"], "Sorry, you did not enter your email!")
-
-    def test_registration_email_vague_data(self):
-        user = dict(
-            username="Barna",
-            email="barna@..Com",
-            password="123456"
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(reply["message"], "Invalid email address!")
-
-    def test_registration_password_empty(self):
-        user = dict(
-            username="Barna",
-            email="barna@gmail.Com",
-            password=""
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(reply["message"], "Sorry, you did not enter your password!")
-
-    def registration_password_spaces_entry(self):
-        user = dict(
-            username="Barna",
-            email="barna@gmail.Com",
-            password=" "
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(
-            reply["message"], "Sorry, you did not enter your password!"
-            )
-
-    def test_password_length_below_6(self):
-        user = dict(
-            username="Barna",
-            email="barna@gmail.com",
-            password="12bar"
-        )
-
-        response = self.tester.post(
-                'api/v1/signup',
-                content_type='application/json',
-                data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(
-            reply["message"], "Passwords should be at least 6 characters long!"
-            )
-
-    def test_password_correct(self):
-        user = dict(
-            username="Barna",
-            email="barna@gmail.com",
-            password="1234567"
-        )
-
-        response = self.tester.post(
-            'api/v1/signup',
+            'api/v1/auth/signup',
             content_type='application/json',
-            data=json.dumps(user)
+            data=json.dumps(user1)
         )
 
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(reply["message"], "Barna has registered successfully")
-
-    def test_user_login_empty_username(self):
-        user = dict(
-            username='',
-            password='aoixamklx'
-        )
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
             'api/v1/login',
             content_type='application/json',
-            data=json.dumps(user)
+            data=json.dumps(user1)
         )
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'You did not enter your username!')
+        self.assertEqual(reply['message'], 'username is logged in.')
 
-    def test_user_login_space_username(self):
-        user = dict(
-            username=' ',
-            password='aoixamklx'
+        token = reply['token']
+
+        question = dict(
+            details="my question"
         )
+
+        self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        user2 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
             'api/v1/login',
             content_type='application/json',
-            data=json.dumps(user)
+            data=json.dumps(user2)
         )
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'You did not enter your username!')
+        token = reply['token']
 
-    def test_user_login_empty_password(self):
-        user = dict(
-            username='Barna',
-            password=''
+        self.assertEqual(reply['message'], 'barna is logged in.')
+
+        answer = dict(
+            answer=''
         )
+
+        response = self.tester.post(
+            'api/v1/questions/2/answers',
+            content_type='application/json',
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(
+            response.status_code, 400
+        )
+
+    def test_add_answer_successfully(self):
+        """
+        Test user can add an answer successfully
+        """
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
             'api/v1/login',
             content_type='application/json',
-            data=json.dumps(user)
+            data=json.dumps(user1)
         )
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'You did not enter your password!')
+        self.assertEqual(reply['message'], 'username is logged in.')
 
-    def test_user_login_space_password(self):
-        user = dict(
-            username='Barna',
-            password=' '
+        token = reply['token']
+
+        question = dict(
+            question="my question"
         )
+
+        response = self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        user2 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
             'api/v1/login',
             content_type='application/json',
-            data=json.dumps(user)
+            data=json.dumps(user2)
         )
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'You did not enter your password!')
+        token = reply['token']
+
+        self.assertEqual(reply['message'], 'barna is logged in.')
+
+        answer = dict(
+            answer='this is my answer'
+        )
+
+        response = self.tester.post(
+            'api/v1/questions/1/answers',
+            content_type='application/json',
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['Message'], 'Answer added succesfully!')
+
+    def test_add_answer_to_question_which_does_not_exist(self):
+        """
+        Test that a user can't add an answer to a question which does not exist
+        """
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['message'], 'username is logged in.')
+
+        token = reply['token']
+
+        question = dict(
+            details="my question"
+        )
+
+        self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        user2 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        self.assertEqual(reply['message'], 'barna is logged in.')
+
+        answer = dict(
+            answer='this is my answer'
+        )
+
+        response = self.tester.post(
+            'api/v1/questions/2/answers',
+            content_type='application/json',
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(
+            response.status_code, 400
+        )
 
     def tearDown(self):
-        db = DbConnection()
-        db.drop_answers_table()
+        self.db.drop_user_table()
+        self.db.drop_questions_table()
+        self.db.drop_answers_table()
