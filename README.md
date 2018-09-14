@@ -70,17 +70,17 @@ The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-
 
 ## Endpoints
 
-HTTP Method|Endpoint|Functionality|Parameters|Protected|
------------|--------|-------------
-POST|/signup|Register a user
-POST|/login|Login a user
-POST|/questions|Create a question
-POST|/questions/int:questionId|Delete a question
-GET|/questions/questionId|Fetch a specific question
-GET|/questions|Fetch all questions
-GET|/questions|Fetch all a specific user's questions
-POST|/questions/questionId/answers|Add an answer
-PUT|/questions/questionId/answers/answerId|Add an answer
+HTTP Method | Endpoint | Functionality | Parameters | Protected
+----------- | -------- | ------------- | ---------- | 
+POST | /signup | Register a user| None | False
+POST | /login | Login a user | None | False
+POST | /questions | Create a question | None | True
+POST | /questions/int:question_id | Delete a question | questionId | True
+GET | /questions/questionId | Fetch a specific question | questionId | True
+GET | /questions | Fetch all questions | None | True
+GET | /questions | Fetch all a specific user's questions | None | True
+POST | /questions/questionId/answers | Add an answer | None | question_id | True
+PUT | /questions/questionId/answers/answerId | Add an answer | question_id, answer_id | True
 
 ## Tools Used
 
