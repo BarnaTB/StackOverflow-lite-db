@@ -78,7 +78,7 @@ POST | /questions/int:question_id | Delete a question | questionId | True
 GET | /questions/questionId | Fetch a specific question | questionId | True
 GET | /questions | Fetch all questions | None | True
 GET | /questions | Fetch all a specific user's questions | None | True
-POST | /questions/questionId/answers | Add an answer | None | question_id | True
+POST | /questions/questionId/answers | Add an answer | question_id | True
 PUT | /questions/questionId/answers/answerId | Add an answer | question_id, answer_id | True
 
 ## Tools Used
