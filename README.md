@@ -69,9 +69,8 @@ and for Linux and MacOS
 The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-lite/) and the python app is hosted on [heroku](https://stackoverflow-lite1.herokuapp.com/). They, however, have only been tested with Google Chrome and Mozilla Firefox so **no** assurance of perfomance in any other browser can be given.
 
 ## Endpoints
-
 HTTP Method | Endpoint | Functionality | Parameters | Protected
------------ | -------- | ------------- | ---------- | 
+----------- | -------- | ------------- | ---------- | ---------
 POST | /signup | Register a user| None | False
 POST | /login | Login a user | None | False
 POST | /questions | Create a question | None | True
