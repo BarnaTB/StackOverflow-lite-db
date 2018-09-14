@@ -15,6 +15,7 @@ The pages do not need much to be viewed as any web browser can view them from [t
 ## Installing
 
 * Clone the project into your local repository using this command:
+
 ```sh
   $ git clone https://github.com/BarnaTB/StackOverflow-lite-db.git
   ```

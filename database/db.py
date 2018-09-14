@@ -1,12 +1,11 @@
 import psycopg2
 import os
-from pprint import pprint
 
 
 class DbConnection:
     def __init__(self):
         try:
-            if os.getenv('APP_SETTINGS') == 'testing':
+            if os.getenv('APP_SETTINGS') == 'testig':
                 self.db = 'test_db'
             else:
                 self.db = 'stackoverflow'
@@ -20,9 +19,9 @@ class DbConnection:
             self.create_questions_table()
             self.create_answers_table()
 
-            pprint("Connected!")
+            print("Connected!")
         except:
-            pprint('Failed to connect to database')
+            print('Failed to connect to database')
 
     def create_user_table(self):
         create_user_table_command = """
@@ -100,12 +99,12 @@ class DbConnection:
 
         return user
 
-    def insert_question(self, user_id, details):
+    def insert_question(self, user_id, question):
         insert_question_command = """
-        INSERT INTO questions (userId, details) VALUES(%s, %s);
+        INSERT INTO questions (userId, question) VALUES(%s, %s);
         """
         self.cursor.execute(
-            insert_question_command, [user_id[0], details]
+            insert_question_command, [user_id[0], question]
         )
 
     def fetch_question_by_id(self, question_id):
@@ -176,12 +175,12 @@ class DbConnection:
             delete_question_command, [user_id[0], question_id]
         )
 
-    def insert_answer(self, user_id, question_id, details):
+    def insert_answer(self, user_id, question_id, answer):
         insert_answer_command = """
-        INSERT INTO answers(userid, questionid, details) VALUES(%s, %s, %s);
+        INSERT INTO answers(userid, questionid, answer) VALUES(%s, %s, %s);
         """
         self.cursor.execute(
-            insert_answer_command, [user_id[0], question_id, details]
+            insert_answer_command, [user_id[0], question_id, answer]
         )
 
     def fetch_answers_by_question_id(self, question_id):
@@ -217,8 +216,21 @@ class DbConnection:
             update_question_command, [details, user_id[0], question_id]
             )
 
-    def truncate_table(self, table_name):
-        truncate_table_command = """
-        TRUNCATE TABLE %s RESTART INDENTITY;
+    def drop_user_table(self):
+        drop_user_table_command = """
+        DROP TABLE users;
         """
-        self.cursor.execute(truncate_table_command, [table_name])
+        self.cursor.execute(drop_user_table_command)
+
+    def drop_questions_table(self):
+        drop_questions_table_command = """
+        DROP TABLE questions;
+        """
+        self.cursor.execute(drop_questions_table_command)
+
+    def drop_answers_table(self):
+        drop_answers_table_command = """
+        DROP TABLE answers;
+        """
+
+        self.cursor.execute(drop_answers_table_command)

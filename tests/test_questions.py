@@ -9,31 +9,40 @@ from database.db import DbConnection
 
 class TestQuestions(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
         self.tester = app.test_client(self)
-        db = DbConnection()
-        db.create_questions_table()
-        self.user1 = dict(
-            username='barna',
-            email='barna@email.com',
-            password='Pwer52j'
-        )
-        self.user2 = dict(
-            username='barna',
-            password='Pwer52j'
+        self.db = DbConnection()
+
+    def test_add_question_successfully(self):
+        """Method to test that a user can add a question successfully"""
+        user = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
         )
 
-    def test_add_question(self):
-        signup_response = self.tester.post('api/v1/auth/signup', content_type="application/json", data=json.dumps(self.user1))
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
 
-        self.assertEqual(signup_response.json, {"message": "User created successfully!"})
-        self.assertEqual(signup_response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
 
-        login_response = self.tester.post(
-            'api/v1/auth/login', content_type="application/json", data=json.dumps(user2))
-        self.assertEqual(login_response.status_code, 200)
+        login_user = dict(
+            username='username',
+            password='tyIY790hskj'
+        )
 
-        login = login_response.json
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(login_user)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['message'], 'username is logged in.')
+        login = response.json
         token = login['token']
 
         question = dict(
@@ -45,24 +54,88 @@ class TestQuestions(unittest.TestCase):
             headers={'Authorization': 'Bearer {}'.format(token)},
             data=json.dumps(question)
         )
-        # reply = json.loads(response.data.decode())
 
-        self.assertEqual(response.data, "Question added successfully!")
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['message'], "Question added successfully!")
 
     def test_add_question_empty_string(self):
+        """Method to test that a user cannot post empty question"""
+
+        user = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        login_user = dict(
+            username='username',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(login_user)
+        )
+
+        reply = json.loads(response.data.decode())
+        
+        self.assertEqual(reply['message'], 'username is logged in.')
+        token = reply['token']
+
         question = dict(
             question=''
         )
         response = self.tester.post(
             'api/v1/questions',
             content_type='application/json',
-            data=json.dumps(question)
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
         )
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply["message"], "Sorry, you didn't enter any question!")
+        self.assertEqual(
+            reply["message"], "Sorry, you didn't enter any question!"
+        )
 
     def test_add_question_user_enters_a_space(self):
+        """Method to test that a user cannot add a question with empty space"""
+        user = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        login_user = dict(
+            username='username',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(login_user)
+        )
+
+        reply = json.loads(response.data.decode())
+
         question = dict(
             question=' '
         )
@@ -73,9 +146,11 @@ class TestQuestions(unittest.TestCase):
         )
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply["message"], "Sorry, you didn't enter any question!")
+        self.assertEqual(
+            reply["message"], "Sorry, you didn't enter any question!"
+        )
 
-    def test_get_one_question(self):
+    def test_get_one_question_without_token(self):
         question = dict(
             question='this is my question'
         )
@@ -89,38 +164,24 @@ class TestQuestions(unittest.TestCase):
             'api/v1/questions/1'
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 401)
 
-    def test_get_one_question_if_there_are_no_questions_yet(self):
-        response = self.tester.get(
-            'api/v1/questions/1'
-        )
+    # def test_get_one_question_out_of_index(self):
+    #     question = dict(
+    #         question='my question'
+    #     )
 
-        if len(questions) < 0:
-            self.assertEqual(
-                response['message'], 'You have no questions yet.'
-                )
+    #     self.tester.post(
+    #         'api/v1/questions',
+    #         content_type='applcation/json',
+    #         data=json.dumps(question)
+    #     )
 
-    def test_get_one_question_out_of_index(self):
-        question = dict(
-            question='my question'
-        )
+    #     response = self.tester.get(
+    #         'api/v1/questions/2'
+    #     )
 
-        self.tester.post(
-            'api/v1/questions',
-            content_type='applcation/json',
-            data=json.dumps(question)
-        )
-
-        response = self.tester.get(
-            'api/v1/questions/2'
-        )
-
-        if len(questions) == 1:
-            # self.assertEqual(
-            #     response['message'], 'Question does not exist.'
-            #     )
-            self.assertRaises(IndexError, response)
+    #     self.assertEqual(, response)
 
     def test_get_all_questions(self):
         question = dict(
@@ -139,7 +200,7 @@ class TestQuestions(unittest.TestCase):
 
         self.assertEqual(
             response.status_code, 200
-            )
+        )
 
     # def test_get_all_questions_from_empty_list(self):
     #     response = self.tester.get(
@@ -151,7 +212,7 @@ class TestQuestions(unittest.TestCase):
     #             response['message'], 'You have no questions yet.'
     #             )
 
-    def test_delete_question(self):
+    def test_delete_question_without_token(self):
         question = dict(
             details='my question'
         )
@@ -166,32 +227,36 @@ class TestQuestions(unittest.TestCase):
             'api/v1/questions/1'
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 401)
 
-    # def test_delete_question_which_does_not_exist(self):
-    #     question = dict(
-    #         details='my question'
-    #     )
+    def test_delete_question_which_does_not_exist(self):
+        question = dict(
+            details='my question'
+        )
 
-    #     self.tester.post(
-    #         'api/v1/questions',
-    #         content_type='application/json',
-    #         data=json.dumps(question)
-    #     )
+        self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question)
+        )
 
-    #     response = self.tester.delete(
-    #         'api/v1/questions/3'
-    #     )
+        response = self.tester.delete(
+            'api/v1/questions/3'
+        )
 
-    #     if len(questions) == 1:
-    #         self.assertEqual(response.status_code, 404)
+        if len(questions) == 1:
+            self.assertEqual(response.status_code, 404)
 
-    # def test_delete_questions_from_empty_list(self):
-    #     response = self.tester.get(
-    #         'api/v1/questions/1'
-    #     )
+    def test_delete_questions_from_empty_list(self):
+        response = self.tester.get(
+            'api/v1/questions/1'
+        )
 
-    #     if len(questions) < 0:
-    #         self.assertEqual(
-    #             response['message'], 'There are no questions to delete!'
-    #             )
+        if len(questions) < 0:
+            self.assertEqual(
+                response['message'], 'There are no questions to delete!'
+            )
+
+    def tearDown(self):
+        self.db.drop_user_table()
+        self.db.drop_questions_table()

@@ -334,22 +334,6 @@ class TestUsers(unittest.TestCase):
 
         self.assertEqual(reply['message'], 'You did not enter your password!')
 
-    def test_user_login_successfully(self):
-        user = dict(
-            username='Barna',
-            password='asxon[8'
-        )
-
-        response = self.tester.post(
-            'api/v1/login',
-            content_type='application/json',
-            data=json.dumps(user)
-        )
-
-        reply = json.loads(response.data.decode())
-
-        self.assertEqual(reply['message'], 'Barna is logged in.')
-
     def tearDown(self):
         db = DbConnection()
-        db.truncate_table('answers')
+        db.drop_answers_table()

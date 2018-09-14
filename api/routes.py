@@ -154,7 +154,7 @@ def add_answer(question_id):
         question['questionid'] = qn[0][1]
         question['details'] = qn[0][2]
 
-        db.insert_answer(user_id, question_id, details)
+        db.insert_answer(user_id, question_id, answer)
 
         return jsonify({
             'Question': question,
@@ -339,7 +339,7 @@ upper case and numbers'
     return jsonify({
         'Username': username,
         'message': '{} has registered successfully'.format(username)
-    }), 400
+    }), 201
 
 
 @mod.route('/login', methods=['POST'])

@@ -8,27 +8,10 @@ from database.db import DbConnection
 class TestUsers(unittest.TestCase):
     def setUp(self):
         self.db = DbConnection()
-        self.register_successfully()
         self.tester = app.test_client(self)
 
-    def register_successfully(self):
-        """Method to register test user"""
-        user = dict(
-            username='username',
-            email='username@mail.com',
-            password='tyIY790hskj'
-        )
-
-        response = self.tester.post(
-            'api/v1/auth/signup',
-            content_type='application/json',
-            data=json.dumps(user)
-        )
-
-        return response
-
     def test_register_successfully(self):
-        """Method to test successful user registration"""
+        """Test successful user registration"""
         user = dict(
             username='username',
             email='username@mail.com',
@@ -41,7 +24,7 @@ class TestUsers(unittest.TestCase):
             data=json.dumps(user)
         )
 
-        self.assertEqual(response.data, 'username has registered successfully')
+        self.assertEqual(response.status_code, 201)
 
     def test_registration_empty_username(self):
         user = dict(
@@ -174,7 +157,7 @@ class TestUsers(unittest.TestCase):
         user = dict(
             username="Barna",
             email="barna@gmail.com",
-            password="12bar"
+            password="1Bbar"
         )
 
         response = self.tester.post(
@@ -193,7 +176,7 @@ class TestUsers(unittest.TestCase):
         user = dict(
             username="Barna",
             email="barna@gmail.com",
-            password="1234567"
+            password="12Byi567"
         )
 
         response = self.tester.post(
@@ -271,10 +254,20 @@ class TestUsers(unittest.TestCase):
         self.assertEqual(reply['message'], 'You did not enter your password!')
 
     def test_user_login_successfully(self):
+        """Test user can login successfully"""
         user = dict(
-            username='Barna',
-            password='asxon[8'
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
         )
+
+        response = self.tester.post(
+            'api/v1/auth/signup',
+            content_type='application/json',
+            data=json.dumps(user)
+        )
+
+        self.assertEqual(response.status_code, 201)
 
         response = self.tester.post(
             'api/v1/login',
@@ -284,8 +277,7 @@ class TestUsers(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'Barna is logged in.')
+        self.assertEqual(reply['message'], 'username is logged in.')
 
     def tearDown(self):
-        # db = DbConnection()
-        self.db.truncate_table('users')
+        self.db.drop_user_table()
