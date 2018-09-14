@@ -13,41 +13,20 @@ The pages do not need much to be viewed as any web browser can view them from [t
 ## Installing
 
 * Clone the project into your local repository using this command:
+```sh
+  $ git clone https://github.com/BarnaTB/StackOverflow-lite-db.git
+  ```
+  Switch to the cloned directory, install a virtual environment, create a virtual environment, activate it, install app dependencies and run the app.
+  ```sh
+    $ cd StackOverflow-lite-db
+    $ pip install virtualenv
+    $ virtualenv venv
+    $ source venv/bin/activate
+    $ pip install -r requirements.txt
+    $ python run.py
+```
 
-`git clone https://github.com/BarnaTB/StackOverflow-lite-db.git`
-
-* Change directory to the cloned folder using the following command for Windows, Linux and MacOS
-
-`cd StackOverflow-lite-db`
-
-* Switch to the ch-test-endpoints branch
-
-`git checkout ch-test-endpoints`
-
-* If you do not have a virtual environment installed run the following command, else follow the next steps.
-
-`pip install virtualenv`
-
-* Create a virtual environment(for Windows, Linux and MacOS)
-
-`virtualenv venv`
-
-* Activate the virtual environment(Windows only)
-
-`source venv/Scripts/activate`
-
-and for Linux and MacOS
-
-`source venv/bin/activate`
-
-* Install the app dependencies.(for Windows, Linux and MacOS)
-
-`pip install -r requirements.txt`
-
-* Run the app(for Windows, Linux and MacOS)
-
-`python run.py`
-
+**Note** If you're using Windows, activate your virtualenv using `` $ source venv/Scripts/activate ``
 * Copy the url http://127.0.0.1:5000/ into your Postman and to run any endpoint follow the table under the heading (**Endpoints**) with the url prefix ('/api/v1') for each endpoint.
 
 ## Running the tests
