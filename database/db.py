@@ -1,18 +1,31 @@
 import psycopg2
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 
 class DbConnection:
-    def __init__(self):
+    def __init__(self, db_url):
         try:
-            if os.getenv('APP_SETTINGS') == 'testig':
-                self.db = 'test_db'
-            else:
-                self.db = 'stackoverflow'
+            parsed_url = urlparse(db_url)
+            dbname = parsed_url.path[1:]
+            username = parsed_url.username
+            hostname = parsed_url.hostname
+            password = parsed_url.password
+            port = parsed_url.port
+            print(parsed_url)
+            # if os.getenv('APP_SETTINGS') == 'testing':
+            #     self.db = 'test_db'
+            # else:
+            #     self.db = 'stackoverflow'
             self.connection = psycopg2.connect(
-                database='{}'.format(self.db),
-                user='postgres', password='##password',
-                host='localhost', port='5432')
+                database=dbname,
+                user=username,
+                password=password,
+                host=hostname,
+                port=port)
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
             self.create_user_table()
