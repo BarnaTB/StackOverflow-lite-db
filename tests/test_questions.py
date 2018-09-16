@@ -12,6 +12,11 @@ class TestQuestions(unittest.TestCase):
         self.tester = app.test_client(self)
         self.db = DbConnection()
 
+    def tearDown(self):
+        self.db.drop_user_table()
+        self.db.drop_answers_table()
+        self.db.drop_questions_table()
+
     def test_add_question_successfully(self):
         """Method to test that a user can add a question successfully"""
         user = dict(
@@ -26,7 +31,9 @@ class TestQuestions(unittest.TestCase):
             data=json.dumps(user)
         )
 
-        self.assertEqual(response.status_code, 201)
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['message'], 'username has registered successfully')
 
         login_user = dict(
             username='username',
@@ -399,7 +406,3 @@ class TestQuestions(unittest.TestCase):
         self.assertEqual(
             reply['message'], 'There are no questions to delete!'
         )
-
-    def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_questions_table()

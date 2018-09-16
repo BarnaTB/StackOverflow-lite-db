@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required
 from database.db import DbConnection
 
 
-db = DbConnection()
+db = DbConnection('test_db')
 
 
 mod = Blueprint('questions', __name__)
@@ -365,7 +365,7 @@ def login():
         return jsonify({
             'message': 'Sorry, wrong username!'
         }), 400
-    if not db.fetch_user_password(username):
+    if not User.verify_password(username, password):
         return jsonify({
             'message': 'Sorry, wrong password!'
         }), 400

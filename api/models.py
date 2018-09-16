@@ -2,13 +2,14 @@ from flask import jsonify
 import re
 from passlib.hash import pbkdf2_sha256 as sha256
 from database.db import DbConnection
+# from instance.config import DevelopmentConfig
 
 
 users = []
 questions = []
 answers = []
 
-db = DbConnection()
+db = DbConnection('test_db')
 
 
 class User:
@@ -24,6 +25,14 @@ class User:
     @staticmethod
     def verify_hash(password, password_hash):
         return sha256.verify(password, password_hash)
+
+    @staticmethod
+    def verify_password(username, password):
+        user_password = db.fetch_user_password(username)
+        user_pass = user_password[0][0]
+        if user_pass == password:
+            return True
+        return False
 
 
 class Question:

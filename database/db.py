@@ -1,40 +1,27 @@
 import psycopg2
 import os
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
+from pprint import pprint
 
 
 class DbConnection:
-    def __init__(self, db_url):
+    def __init__(self, dbname='stackoverflow'):
         try:
-            parsed_url = urlparse(db_url)
-            dbname = parsed_url.path[1:]
-            username = parsed_url.username
-            hostname = parsed_url.hostname
-            password = parsed_url.password
-            port = parsed_url.port
-            print(parsed_url)
-            # if os.getenv('APP_SETTINGS') == 'testing':
-            #     self.db = 'test_db'
-            # else:
-            #     self.db = 'stackoverflow'
             self.connection = psycopg2.connect(
                 database=dbname,
-                user=username,
-                password=password,
-                host=hostname,
-                port=port)
+                user='postgres',
+                password='##password',
+                host='localhost',
+                port='5432')
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
             self.create_user_table()
             self.create_questions_table()
             self.create_answers_table()
 
-            print("Connected!")
+            pprint("Connected!")
+            pprint(dbname)
         except:
-            print('Failed to connect to database')
+            pprint('Failed to connect to database')
 
     def create_user_table(self):
         create_user_table_command = """
