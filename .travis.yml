@@ -2,19 +2,15 @@ language: python
 python:
   - "3.5"
 
-install:
-  - "pip install -r requirements.txt"
-
 services:
   - postgresql
 
 before-script:
+  - pip3 install -r requirements.txt
   - psql -c 'CREATE DATABASE test_db;' -U postgres
 
 script:
-   - pytest -v --cov app
-   - coverage report
-
+  - python -m pytest -v --cov app --cov-report term-missing
 
 after_success:
   - coveralls
