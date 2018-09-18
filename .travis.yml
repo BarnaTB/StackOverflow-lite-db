@@ -2,9 +2,6 @@ language: python
 python:
   - "3.5"
 
-# installing:
-#   - "pip install -r requirements.txt"
-
 services:
   - postgresql
 
