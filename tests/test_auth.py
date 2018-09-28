@@ -10,11 +10,6 @@ class TestUsers(unittest.TestCase):
         self.db = DbConnection()
         self.tester = app.test_client(self)
 
-    def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_questions_table()
-        self.db.drop_answers_table()
-
     def test_register_successfully(self):
         """Test successful user registration"""
         user = dict(
@@ -301,3 +296,8 @@ class TestUsers(unittest.TestCase):
         reply = json.loads(response.data.decode())
 
         self.assertEqual(reply['message'], 'barna is logged in.')
+
+    def tearDown(self):
+        self.db.drop_user_table()
+        self.db.drop_questions_table()
+        self.db.drop_answers_table()

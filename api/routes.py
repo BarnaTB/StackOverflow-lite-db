@@ -9,7 +9,7 @@ from flask_jwt_extended import jwt_required
 from database.db import DbConnection
 
 
-db = DbConnection('test_db')
+db = DbConnection()
 
 
 mod = Blueprint('questions', __name__)
@@ -177,7 +177,7 @@ def delete_question(question_id):
     database and then the user is allowed to deleted the question.
 
     :param question_id:
-    This holds the integer value of the question that the user wishes to delete
+    Holds the integer value of the question that the user wishes to delete
     from the database.
 
     :returns:
@@ -216,20 +216,19 @@ belong to you!'
 def modify_question(question_id):
     data = request.get_json()
 
-    details = data.get('details')
+    question = data.get('question')
 
     user_id = get_jwt_identity()
 
-    if not details or details.isspace():
+    if not question or question.isspace():
         return jsonify({
             "message": "Sorry, you didn't enter any question!"
         }), 400
-    qn = Question(user_id, details)
     question = Question.fetch_question_by_id(question_id)
     questions = Question.fetch_user_questions(user_id, question_id)
     if questions:
         if question:
-            updated_question = qn.update_question(question_id, details)
+            updated_question = qn.update_question(question_id, question)
             dict_question = {}
             dict_question['userid'] = updated_question[0][0]
             dict_question['questionid'] = updated_question[0][1]
@@ -311,7 +310,6 @@ def register():
         return jsonify({
             'message': 'Invalid email address!'
         }), 400
-    # source: https://docs.python.org/2/howto/regex.html
     low = re.search(r"[a-z]", password)
     up = re.search(r"[A-Z]", password)
     num = re.search(r"[0-9]", password)
@@ -332,9 +330,9 @@ upper case and numbers'
         return jsonify({
             'message': 'Sorry, that email is registered to another user!'
         }), 400
-    # user = User(user_id, username, email, password)
     # hashed_password = generate_password_hash(password)
-    db.insert_user(username, email, password)
+    user = User(username, email, password)
+    user.add_user()
 
     return jsonify({
         'Username': username,

@@ -4,10 +4,14 @@ from pprint import pprint
 
 
 class DbConnection:
-    def __init__(self, dbname='stackoverflow'):
+    def __init__(self):
+        if os.getenv('APP_SETTINGS') == 'testing':
+            self.dbname = 'test_db'
+        else:
+            self.dbname = 'stackoverflow'
         try:
             self.connection = psycopg2.connect(
-                database=dbname,
+                database=self.dbname,
                 user='postgres',
                 password='##password',
                 host='localhost',
@@ -19,9 +23,10 @@ class DbConnection:
             self.create_answers_table()
 
             pprint("Connected!")
-            pprint(dbname)
-        except:
-            pprint('Failed to connect to database')
+            pprint(self.db)
+        except Exception as e:
+            pprint(e)
+            pprint('Failed to connect to database!')
 
     def create_user_table(self):
         create_user_table_command = """
@@ -162,7 +167,7 @@ class DbConnection:
         """
         self.cursor.execute(
             fetch_user_question_command, [user_id[0], question_id]
-            )
+        )
         qn = self.cursor.fetchone()
 
         return qn
@@ -205,16 +210,16 @@ class DbConnection:
         """
         self.cursor.execute(
             prefer_answer_command, [accepted, question_id, answer_id]
-            )
+        )
 
-    def update_question(self, user_id, question_id, details):
+    def update_question(self, user_id, question_id, question):
         update_question_command = """
-        UPDATE questions SET details=%s\
+        UPDATE questions SET question=%s\
         WHERE userid=%s AND questionid=%s;
         """
         self.cursor.execute(
-            update_question_command, [details, user_id[0], question_id]
-            )
+            update_question_command, [question, user_id[0], question_id]
+        )
 
     def drop_user_table(self):
         drop_user_table_command = """

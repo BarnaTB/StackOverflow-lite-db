@@ -2,22 +2,23 @@ from flask import jsonify
 import re
 from passlib.hash import pbkdf2_sha256 as sha256
 from database.db import DbConnection
-# from instance.config import DevelopmentConfig
 
 
 users = []
 questions = []
 answers = []
 
-db = DbConnection('test_db')
+db = DbConnection()
 
 
 class User:
-    def __init__(self, userId, username, email, password):
-        self.userId = userId
+    def __init__(self, username, email, password):
         self.username = username
         self.email = email
         self.password = password
+
+    def add_user(self):
+        db.insert_user(self.username, self.email, self.password)
 
     def generate_hash(self):
         return sha256.hash(self.password)
@@ -36,10 +37,8 @@ class User:
 
 
 class Question:
-    def __init__(self, user_id, details):
-        self.user_id = user_id
-        # self.questionId = questionId
-        self.details = details
+    def __init__(self, question):
+        self.question = question
 
     @staticmethod
     def fetch_all_questions():
@@ -76,19 +75,20 @@ class Question:
             return None
         return qns
 
-    def update_question(self, question_id, details):
-        db.update_question(self.user_id, question_id, details)
+    @staticmethod
+    def update_question(user_id, question_id, question):
+        db.update_question(user_id, question_id, question)
 
-        qn = db.fetch_user_questions(self.user_id, question_id)
+        qn = db.fetch_user_questions(user_id, question_id)
 
         return qn
 
 
 class Answer:
-    def __init__(self, user_id, question_id, answer_id, details):
+    def __init__(self, user_id, question_id, answer_id, answer):
         self.answerId = answer_id
         self.question_id = question_id
-        self.details = details
+        self.answer = answer
         self.user_id = user_id
         self.accepted = False
 
