@@ -17,7 +17,6 @@ before-script:
 
 script:
   - nosetests --with-coverage --cover-tests
-  - coverage report
 
 after_success:
   - coveralls
