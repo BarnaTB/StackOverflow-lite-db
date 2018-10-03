@@ -16,7 +16,7 @@ before-script:
   - psql -c 'CREATE DATABASE test_db;' -U postgres
 
 script:
-  - python3 -m pytest --cov
+  - pytest --cov
 
 after_success:
   - coveralls
