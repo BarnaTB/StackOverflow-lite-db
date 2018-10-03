@@ -10,13 +10,13 @@ env:
     - APP_SETTINGS=testing
 
 install:
-  - "pip install -r requirements.txt"
+  - pip install -r requirements.txt
 
 before-script:
-  - "psql -c 'CREATE DATABASE test_db;' -U postgres"
+  - psql -c 'CREATE DATABASE test_db;' -U postgres
 
 script:
-  - nosetests --with-coverage --cover-tests
+  - python3 -m pytest --cov api
 
 after_success:
   - coveralls
