@@ -1,6 +1,6 @@
 # StackOverflow-lite
 
-[![Build Status](https://travis-ci.org/BarnaTB/StackOverflow-lite-db.svg?branch=ft-api)](https://travis-ci.org/BarnaTB/StackOverflow-lite-db) [![Coverage Status](https://coveralls.io/repos/github/BarnaTB/StackOverflow-lite-db/badge.svg?branch=ft-api)](https://coveralls.io/github/BarnaTB/StackOverflow-lite-db?branch=ft-api)
+[![Build Status](https://travis-ci.org/BarnaTB/StackOverflow-lite-db.svg?branch=ft-api)](https://travis-ci.org/BarnaTB/StackOverflow-lite-db) [![Coverage Status](https://coveralls.io/repos/github/BarnaTB/StackOverflow-lite-db/badge.svg?branch=ft-api)](https://coveralls.io/github/BarnaTB/StackOverflow-lite-db?branch=ft-api) [![codecov](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db/branch/ft-api/graph/badge.svg)](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db)
 
 StackOverflow-lite is a platform where people can ask questions and provide answers.
 
