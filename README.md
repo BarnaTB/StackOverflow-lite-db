@@ -57,7 +57,7 @@ Install pytest, source the .env file, run the tests.
 
 ## Deployment
 
-The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-lite/) and the python app is hosted on [heroku](https://stackoverflo.herokuapp.com/). They, however, have only been tested with Google Chrome and Mozilla Firefox so **no** assurance of perfomance in any other browser can be given.
+The UI pages are live on [github pages](https://barnatb.github.io/StackOverflow-lite/) and the python app is hosted on [heroku](https://stackoverflo.herokuapp.com/apidocs/). They, however, have only been tested with Google Chrome and Mozilla Firefox so **no** assurance of perfomance in any other browser can be given.
 
 ## Tools Used
 
