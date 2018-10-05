@@ -1,6 +1,7 @@
 # StackOverflow-lite
 
-[![Build Status](https://travis-ci.org/BarnaTB/StackOverflow-lite-db.svg?branch=ft-api)](https://travis-ci.org/BarnaTB/StackOverflow-lite-db) [![Coverage Status](https://coveralls.io/repos/github/BarnaTB/StackOverflow-lite-db/badge.svg?branch=ft-api)](https://coveralls.io/github/BarnaTB/StackOverflow-lite-db?branch=ft-api) [![codecov](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db/branch/ft-api/graph/badge.svg)](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db)
+
+[![Build Status](https://travis-ci.org/BarnaTB/StackOverflow-lite-db.svg?branch=ft-api)](https://travis-ci.org/BarnaTB/StackOverflow-lite-db) [![Coverage Status](https://coveralls.io/repos/github/BarnaTB/StackOverflow-lite-db/badge.svg?branch=ft-api)](https://coveralls.io/github/BarnaTB/StackOverflow-lite-db?branch=ft-api) [![codecov](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db/branch/ft-api/graph/badge.svg)](https://codecov.io/gh/BarnaTB/StackOverflow-lite-db) [![Build status](https://ci.appveyor.com/api/projects/status/trm2ok8ulr0jlge4/branch/ft-api?svg=true)](https://ci.appveyor.com/project/BarnaTB/stackoverflow-lite-db/branch/ft-api) [![Maintainability](https://api.codeclimate.com/v1/badges/ee435c266d1d3decbac6/maintainability)](https://codeclimate.com/github/BarnaTB/StackOverflow-lite-db/maintainability)
 
 StackOverflow-lite is a platform where people can ask questions and provide answers.
 
