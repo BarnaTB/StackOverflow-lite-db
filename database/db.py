@@ -5,7 +5,7 @@ from pprint import pprint
 
 class DbConnection:
     def __init__(self):
-        if os.getenv('APP_SETTINGS') == 'testin':
+        if os.getenv('APP_SETTINGS') == 'testing':
             self.dbname = 'test_db'
         else:
             self.dbname = 'stackoverflow'
