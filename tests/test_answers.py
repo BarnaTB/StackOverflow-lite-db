@@ -10,11 +10,6 @@ class TestAnswer(unittest.TestCase):
         self.tester = app.test_client(self)
         self.db = DbConnection()
 
-    def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_questions_table()
-        self.db.drop_answers_table()
-
     def test_add_answer_without_question(self):
         """Test that a user cannot add answer to non-existent question"""
         user1 = dict(
@@ -24,7 +19,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user1)
         )
@@ -67,7 +62,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user1)
         )
@@ -104,7 +99,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user2)
         )
@@ -149,7 +144,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user1)
         )
@@ -188,7 +183,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user2)
         )
@@ -233,7 +228,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user1)
         )
@@ -270,7 +265,7 @@ class TestAnswer(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user2)
         )
@@ -303,3 +298,8 @@ class TestAnswer(unittest.TestCase):
         self.assertEqual(
             response.status_code, 400
         )
+
+    def tearDown(self):
+        self.db.drop_user_table()
+        self.db.drop_questions_table()
+        self.db.drop_answers_table()

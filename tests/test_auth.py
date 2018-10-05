@@ -19,7 +19,7 @@ class TestUsers(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -280,7 +280,7 @@ class TestUsers(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )

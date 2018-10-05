@@ -1,0 +1,22 @@
+Authentication docs
+---
+parameters:
+  - name: body
+    in: body
+    required: true
+    type: string
+    description: This route enables a registered user login.
+responses:
+  200:
+    description: User is now logged in.
+    schema:
+      id: login
+      properties:
+        username:
+          type: string
+          default: johnDoe
+        password:
+          type: string
+          default: JohnDoe1234
+  400:
+    description: User failed to login!

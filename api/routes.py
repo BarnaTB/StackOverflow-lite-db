@@ -1,12 +1,10 @@
-from flask import Flask, request, jsonify
-import uuid
-import json
+from flask import Flask, request, jsonify, Blueprint
 from api.models import Answer, Question, User, questions, users, answers
-from flask import Blueprint
 import re
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from flask_jwt_extended import jwt_required
 from database.db import DbConnection
+from flasgger import swag_from
 
 
 db = DbConnection()
@@ -166,7 +164,7 @@ def add_answer(question_id):
     }), 404
 
 
-@mod.route('/<int:question_id>', methods=['DELETE'])
+@mod.route('/questions/<int:question_id>', methods=['DELETE'])
 @jwt_required
 def delete_question(question_id):
     """
@@ -280,6 +278,7 @@ def accept_answer(question_id, answer_id):
 
 
 @mod.route('/signup', methods=['POST'])
+@swag_from('docs/register.yml')
 def register():
     """
     Function enables user to register on the platform. It checks if all the
@@ -341,6 +340,7 @@ upper case and numbers'
 
 
 @mod.route('/login', methods=['POST'])
+@swag_from('docs/login.yml')
 def login():
     """
     Function enables to login after validating the data they entered.
