@@ -17,11 +17,13 @@ mod = Blueprint('questions', __name__)
 @jwt_required
 def add_question():
     """
-    Function enables user to create a question by first checking if they have
-    entered an empty string and returns an error message in that case. If not,
-    it creates a question with the information from the json object and adds
-    the question to a list of qeustions called 'questions' and returns a
-    success message wuth the question that has been created.
+    Function enables a logged in user to create a question. It creates a question with
+    the information from the json object and adds the question to a database.
+    
+    :returns:
+    A success message when the question is created successfully.
+    
+    An error message when the question is not created successfully.
     """
     data = request.get_json()
 
@@ -44,18 +46,19 @@ def add_question():
 @jwt_required
 def get_all_questions():
     """
-    Function enables a user to fetch all questions on the platform by checking
-    if the length of the questions list is not zero, in which case it returns
-    an error message telling the user there are no questions in the list yet
-    else, it returns all the questions in the list of questions on the
-    platform.
+    Function enables a logged in user to fetch all their questions on the platform.
+    
+    :returns:
+    List - A list of questions created by the user on the platform.
+    
+    An error message in case there are no questions on the platform.
     """
     user_id = get_jwt_identity()
 
     if Question.fetch_all_questions() is None:
         return jsonify({
             'message': 'Sorry there are no questions yet!'
-        }), 404
+        }), 400
     questions = db.fetch_questions(user_id)
     if questions:
         for question in questions:
@@ -68,23 +71,23 @@ def get_all_questions():
             }), 200
     return jsonify({
         'message': 'There are no questions for this user yet!'
-    }), 404
+    }), 400
 
 
 @mod.route('/questions/<int:question_id>', methods=['GET'])
 @jwt_required
 def get_one_question(question_id):
     """
-    Function enables a user to fetch a single question from the platform
-    using the questionId by checking if that id corresponds to any
-    question in the list in which case it returns a success message
-    with the question that has been fetched. In a case where the question
-    id does not match, an error message is returned stating that the
-    question does not exist.
+    Function enables a logged in user to fetch a single question from the platform.
+    
+    :params:
+    question_id - holds an integer value of the unique id
+    of the question that the user wishes to fetch.
 
-    :param questionId:
-    Parameter holds an integer value of the question id which is the id
-    of the question that the user user to fetch.
+    :returns:
+    A single question whose id matches the parameter question_id.
+
+    An error message in case the requested question does not exist.
     """
     user_id = get_jwt_identity()
     qn = Question.fetch_one_user_question(user_id, question_id)
@@ -118,17 +121,16 @@ def get_one_question(question_id):
 @jwt_required
 def add_answer(question_id):
     """
-    Function enables user to add an answer to a question on the platform.
-    Checks if there is an empty string and returns a message telling the
-    user that they didn't enter anything. Also checks if there are any
-    questions in the list and if not returns a message that there are not
-    questions yet.
-    Then checks if the question whose id they entered exists and if not,
-    returns a message that the quetion does not exist else, returns the
-    answer the user entered together with the question.
+    Function enables a logged in user to add an answer to a question on the platform.
 
-    :param questionId:
-    Parameter holds the id of the question that the user wishes to answer.
+    :params:
+    question_id - holds the integer of the unique id of the question that the user
+    wishes to answer.
+    
+    :returns:
+    Question that was answered together with the answer for the question.
+
+    An error message if the question does not exist.
     """
     data = request.get_json()
 
@@ -161,7 +163,7 @@ def add_answer(question_id):
         }), 201
     return jsonify({
         'message': 'Sorry, this question does not exist!'
-    }), 404
+    }), 400
 
 
 @mod.route('/questions/<int:question_id>', methods=['DELETE'])
@@ -169,17 +171,16 @@ def add_answer(question_id):
 def delete_question(question_id):
     """
     Function enables a logged in user delete a question they created on the
-    platform. Checks if there are any questions in the database and returns
-    an appropriate error message if this is false, else checks that the user
-    is the creator of the question and if that question is existent in the
-    database and then the user is allowed to deleted the question.
+    platform.
 
-    :param question_id:
-    Holds the integer value of the question that the user wishes to delete
-    from the database.
+    :params:
+    question_id - Holds the integer value of the unique id of the question that
+    the user wishes to delete from the database.
 
     :returns:
     A success message when the question is succesfully deleted.
+
+    An error message if the desired question does not exist.
     """
     user_id = get_jwt_identity()
     questions = Question.fetch_all_questions()
@@ -206,12 +207,24 @@ belong to you!'
         }), 400
     return jsonify({
         'message': 'Sorry, this question does not exist!'
-    }), 404
+    }), 400
 
 
 @mod.route('/<int:question_id>', methods=['PUT'])
 @jwt_required
 def modify_question(question_id):
+    """
+    Function enables a logged in user to modify the question they created on
+    the platform.
+    
+    :params:
+    question_id - Holds an integer value for the question that is going to be modified.
+    
+    :returns:
+    The question which has been modified.
+    
+    An error message if the desired question does not exist.
+    """
     data = request.get_json()
 
     question = data.get('question')
@@ -237,15 +250,29 @@ def modify_question(question_id):
             }), 201
         return jsonify({
             'message': 'Sorry, this question does not exist!'
-        }), 404
+        }), 400
     return jsonify({
         'message': 'Sorry, you have no questions to modify!'
-    }), 404
+    }), 400
 
 
 @mod.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
 @jwt_required
 def accept_answer(question_id, answer_id):
+    """
+    Function enables a logged in question author mark the question as accepted.
+    
+    :params:
+    question_id - Holds the integer value of the question whose answer is to be
+    accepted.
+    
+    answer_id - Holds the integer value of the answer which is to be accepted.
+    
+    :returns:
+    The question and accepted answer.
+
+    An error message if either the question or answer does not exist.
+    """
     data = request.get_json()
 
     accepted = data.get('accepted')
@@ -263,7 +290,7 @@ def accept_answer(question_id, answer_id):
                 'Answers': 'Sorry, this question has no answers yet!',
                 'Question': question,
                 'Message': 'Answers to this question were not found!'
-            }), 404
+            }), 400
         db.accept_answer(question_id, answer_id, accepted)
         accepted_answer = Answer.fetch_answers(question_id)
         return jsonify({
@@ -274,17 +301,19 @@ def accept_answer(question_id, answer_id):
     else:
         return jsonify({
                 'message': 'Sorry, that question does not exist!'
-            }), 404
+            }), 400
 
 
 @mod.route('/signup', methods=['POST'])
 @swag_from('docs/register.yml')
 def register():
     """
-    Function enables user to register on the platform. It checks if all the
-    required data is added by the user and then validates that data using
-    regular expressions for the email and password. Returns username in case
-    of successful registration.
+    Function enables user to register on the platform.
+    
+    :returns:
+    A success message when the user registers successfully.
+    
+    An error message in case of an unsuccessful registeration.
     """
     data = request.get_json()
 
@@ -344,7 +373,9 @@ upper case and numbers'
 def login():
     """
     Function enables to login after validating the data they entered.
-    Returns a success message with the username in case of successful login.
+    
+    :returns:
+    A token which is used to access all other protected resources.
     """
     data = request.get_json()
 
@@ -370,6 +401,5 @@ def login():
     user_id = db.fetch_userId(username)
     access_token = create_access_token(user_id)
     return jsonify({
-        'token': access_token,
-        'message': '{} is logged in.'.format(username)
+        'token': access_token
     }), 200
