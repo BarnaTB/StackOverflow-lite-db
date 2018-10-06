@@ -36,7 +36,7 @@ class TestAnswer(unittest.TestCase):
 
         token = reply['token']
 
-        self.assertEqual(reply['message'], 'barna is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         answer = dict(
             answer=''
@@ -77,7 +77,7 @@ class TestAnswer(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         token = reply['token']
 
@@ -116,7 +116,7 @@ class TestAnswer(unittest.TestCase):
 
         token = reply['token']
 
-        self.assertEqual(reply['message'], 'barna is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         answer = dict(
             answer=''
@@ -159,7 +159,7 @@ class TestAnswer(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         token = reply['token']
 
@@ -200,7 +200,7 @@ class TestAnswer(unittest.TestCase):
 
         token = reply['token']
 
-        self.assertEqual(reply['message'], 'barna is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         answer = dict(
             answer='this is my answer'
@@ -243,7 +243,7 @@ class TestAnswer(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         token = reply['token']
 
@@ -282,7 +282,7 @@ class TestAnswer(unittest.TestCase):
 
         token = reply['token']
 
-        self.assertEqual(reply['message'], 'barna is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
         answer = dict(
             answer='this is my answer'

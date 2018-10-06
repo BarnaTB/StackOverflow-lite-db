@@ -295,7 +295,7 @@ class TestUsers(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'barna is logged in.')
+        self.assertIn(reply['token'], reply['token'])
 
     def tearDown(self):
         self.db.drop_user_table()
