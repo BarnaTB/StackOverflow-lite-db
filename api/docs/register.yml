@@ -1,0 +1,25 @@
+Authentication docs
+---
+parameters:
+  - name: body
+    in: body
+    required: true
+    type: string
+    description: This route is used by a new user to create an account.
+responses:
+  201:
+    description: johnDoe has registered successfully
+    schema:
+      id: register
+      properties:
+        username:
+          type: string
+          default: johnDoe
+        email:
+          type: string
+          default: john.doe@example.com
+        password:
+          type: string
+          default: JohnDoe1234
+  400:
+    description: Something went wrong!

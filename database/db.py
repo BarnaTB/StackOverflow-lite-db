@@ -23,7 +23,7 @@ class DbConnection:
             self.create_answers_table()
 
             pprint("Connected!")
-            pprint(self.db)
+            pprint(self.dbname)
         except Exception as e:
             pprint(e)
             pprint('Failed to connect to database!')
@@ -161,17 +161,6 @@ class DbConnection:
 
         return qn
 
-    def fetch_user_question(self, user_id, question_id):
-        fetch_user_question_command = """
-        SELECT * FROM questions WHERE userid=%s AND questionid=%s;
-        """
-        self.cursor.execute(
-            fetch_user_question_command, [user_id[0], question_id]
-        )
-        qn = self.cursor.fetchone()
-
-        return qn
-
     def delete_question(self, user_id, question_id):
         delete_question_command = """
         DELETE FROM questions WHERE userid=%s AND questionid=%s;
@@ -237,5 +226,4 @@ class DbConnection:
         drop_answers_table_command = """
         DROP TABLE answers;
         """
-
         self.cursor.execute(drop_answers_table_command)

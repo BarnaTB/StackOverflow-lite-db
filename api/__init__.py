@@ -9,8 +9,6 @@ app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = 'my-kisumuluzo'
 app.register_blueprint(routes.mod, url_prefix='/api/v1')
-app.register_blueprint(routes.mod, url_prefix='/api/v1/auth')
-app.register_blueprint(routes.mod, url_prefix='/api/v1/questions')
 
 JWTManager(app)
 Swagger(app)

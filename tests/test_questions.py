@@ -12,11 +12,6 @@ class TestQuestions(unittest.TestCase):
         self.tester = app.test_client(self)
         self.db = DbConnection()
 
-    def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_answers_table()
-        self.db.drop_questions_table()
-
     def test_add_question_successfully(self):
         """Method to test that a user can add a question successfully"""
         user = dict(
@@ -26,7 +21,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -48,9 +43,8 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
-        login = response.json
-        token = login['token']
+        self.assertIn(reply['token'], reply['token'])
+        token = reply['token']
 
         question = dict(
             question='what is code?'
@@ -76,7 +70,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -96,7 +90,7 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
         token = reply['token']
 
         question = dict(
@@ -123,7 +117,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -186,7 +180,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -206,7 +200,7 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
         token = reply['token']
 
         question = dict(
@@ -243,7 +237,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -263,7 +257,7 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
         token = reply['token']
 
         question = dict(
@@ -316,7 +310,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -336,7 +330,7 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
         token = reply['token']
 
         question = dict(
@@ -373,7 +367,7 @@ class TestQuestions(unittest.TestCase):
         )
 
         response = self.tester.post(
-            'api/v1/auth/signup',
+            'api/v1/signup',
             content_type='application/json',
             data=json.dumps(user)
         )
@@ -393,7 +387,7 @@ class TestQuestions(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply['message'], 'username is logged in.')
+        self.assertIn(reply['token'], reply['token'])
         token = reply['token']
 
         response = self.tester.delete(
@@ -406,3 +400,8 @@ class TestQuestions(unittest.TestCase):
         self.assertEqual(
             reply['message'], 'There are no questions to delete!'
         )
+
+    def tearDown(self):
+        self.db.drop_user_table()
+        self.db.drop_answers_table()
+        self.db.drop_questions_table()
