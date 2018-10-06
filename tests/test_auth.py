@@ -85,9 +85,10 @@ class TestUsers(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(
-            reply["message"], "Sorry, you did not enter your email!"
-        )
+        self.assertEqual(reply["message"],
+                         "Sorry, your email cannot be empty and should \
+be a valid email e.g(johndoe@example.com)!"
+                         )
 
     def test_registration_email_space_entry(self):
         """Test that a user cannot register when they enter spaces for email"""
@@ -106,7 +107,8 @@ class TestUsers(unittest.TestCase):
         reply = json.loads(response.data.decode())
 
         self.assertEqual(reply["message"],
-                         "Sorry, you did not enter your email!")
+                         "Sorry, your email cannot be empty and should \
+be a valid email e.g(johndoe@example.com)!")
 
     def test_registration_email_vague_data(self):
         user = dict(
@@ -123,13 +125,15 @@ class TestUsers(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(reply["message"], "Invalid email address!")
+        self.assertEqual(reply["message"],
+                         "Sorry, your email cannot be empty and should \
+be a valid email e.g(johndoe@example.com)!")
 
     def test_registration_password_empty(self):
         """Test a user cannot register with a empty password"""
         user = dict(
             username="barna",
-            email="barna@gmail.Com",
+            email="barna@gmail.com",
             password=""
         )
 
@@ -142,7 +146,8 @@ class TestUsers(unittest.TestCase):
         reply = json.loads(response.data.decode())
 
         self.assertEqual(reply["message"],
-                         "Sorry, you did not enter your password!")
+                         "Passwords cannot be empty and should include lower case, \
+upper case and numbers and should be 6 characters or longer.")
 
     def registration_password_spaces_entry(self):
         """Test a user cannot register with spaces for password"""
@@ -180,9 +185,10 @@ class TestUsers(unittest.TestCase):
 
         reply = json.loads(response.data.decode())
 
-        self.assertEqual(
-            reply["message"], "Passwords should be at least 6 characters long!"
-        )
+        self.assertEqual(reply["message"],
+                         "Passwords cannot be empty and should include lower case, \
+upper case and numbers and should be 6 characters or longer."
+                         )
 
     def test_password_correct(self):
         """Test user can login with correct password"""

@@ -299,6 +299,282 @@ class TestAnswer(unittest.TestCase):
             response.status_code, 400
         )
 
+    def test_accept_answer_successfully(self):
+        """Test that a question author can accept an answer successfully"""
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/signup',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertIn(reply['token'], reply['token'])
+
+        token = reply['token']
+
+        question = dict(
+            question="my question"
+        )
+
+        response = self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        user2 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/signup',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        self.assertIn(reply['token'], reply['token'])
+
+        answer = dict(
+            answer='this is my answer'
+        )
+
+        response = self.tester.post(
+            'api/v1/questions/1/answers',
+            content_type='application/json',
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['Message'], 'Answer added succesfully!')
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        response = self.tester.put(
+            'api/v1/questions/1/answers/1',
+            content_type='application/json',
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['message'], 'Answer updated successfully!')
+
+    def test_accept_answer_which_does_not_exist(self):
+        """
+        Test that a user can not accept an answer which
+        does not exist.
+        """
+        
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/signup',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertIn(reply['token'], reply['token'])
+
+        token = reply['token']
+
+        question = dict(
+            question="my question"
+        )
+
+        response = self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        response = self.tester.put(
+            'api/v1/questions/1/answers/1',
+            content_type='application/json',
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(
+            reply['message'], 'Answers to this question were not found!'
+            )
+
+    def test_accept_question_which_does_not_exist(self):
+        """
+        Test that a user cannot accept an answer to a question which does
+        not exist.
+        """
+        user1 = dict(
+            username='username',
+            email='username@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/signup',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertIn(reply['token'], reply['token'])
+
+        token = reply['token']
+
+        question = dict(
+            question="my question"
+        )
+
+        response = self.tester.post(
+            'api/v1/questions',
+            content_type='application/json',
+            data=json.dumps(question),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        user2 = dict(
+            username='barna',
+            email='barna@mail.com',
+            password='tyIY790hskj'
+        )
+
+        response = self.tester.post(
+            'api/v1/signup',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user2)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        self.assertIn(reply['token'], reply['token'])
+
+        answer = dict(
+            answer='this is my answer'
+        )
+
+        response = self.tester.post(
+            'api/v1/questions/1/answers',
+            content_type='application/json',
+            data=json.dumps(answer),
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(reply['Message'], 'Answer added succesfully!')
+
+        response = self.tester.post(
+            'api/v1/login',
+            content_type='application/json',
+            data=json.dumps(user1)
+        )
+
+        reply = json.loads(response.data.decode())
+
+        token = reply['token']
+
+        response = self.tester.put(
+            'api/v1/questions/2/answers/1',
+            content_type='application/json',
+            headers={'Authorization': 'Bearer {}'.format(token)}
+        )
+
+        reply = json.loads(response.data.decode())
+
+        self.assertEqual(
+            reply['message'], 'Sorry, that question does not exist!'
+            )
+
     def tearDown(self):
         self.db.drop_user_table()
         self.db.drop_questions_table()

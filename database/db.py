@@ -192,19 +192,19 @@ class DbConnection:
         """.format(userId, questionId)
         self.cursor.execute(delete_answer_command)
 
-    def accept_answer(self, question_id, answer_id, accepted):
+    def accept_answer(self, question_id, answer_id):
         prefer_answer_command = """
-        UPDATE answers SET accepted=%s\
-        WHERE questionid=%s AND answerid=%s;
+        UPDATE answers SET accepted=%s \
+WHERE questionid=%s AND answerid=%s;
         """
         self.cursor.execute(
-            prefer_answer_command, [accepted, question_id, answer_id]
+            prefer_answer_command, [True, question_id, answer_id]
         )
 
     def update_question(self, user_id, question_id, question):
         update_question_command = """
-        UPDATE questions SET question=%s\
-        WHERE userid=%s AND questionid=%s;
+        UPDATE questions SET question=%s \
+WHERE userid=%s AND questionid=%s;
         """
         self.cursor.execute(
             update_question_command, [question, user_id[0], question_id]
