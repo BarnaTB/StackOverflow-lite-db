@@ -51,7 +51,8 @@ be a valid email e.g(johndoe@example.com)!'
             'message': 'Passwords cannot be empty and should include lower case, \
 upper case and numbers and should be 6 characters or longer.'
         }), 400
-    if db.fetch_username(username):
+    user_dict = User.fetch_user(username)
+    if user_dict:
         return jsonify({
             'message': 'Sorry, that username is registered to another user!'
         }), 400
@@ -62,7 +63,6 @@ upper case and numbers and should be 6 characters or longer.'
     user.add_user()
 
     return jsonify({
-        'Username': username,
         'message': '{} has registered successfully'.format(username)
     }), 201
 
@@ -89,7 +89,8 @@ def login():
         return jsonify({
             'message': 'You did not enter your password!'
         }), 400
-    if not db.fetch_username(username):
+    user_dict = User.fetch_user(username)
+    if not user_dict:
         return jsonify({
             'message': 'Sorry, wrong username!'
         }), 400
@@ -97,7 +98,8 @@ def login():
         return jsonify({
             'message': 'Sorry, wrong password!'
         }), 400
-    user_id = db.fetch_userId(username)
+    user = User.fetch_user(username)
+    user_id = user['userid']
     access_token = create_access_token(user_id)
     return jsonify({
         'token': access_token
@@ -180,8 +182,8 @@ def get_one_question(question_id):
     An error message in case the requested question does not exist.
     """
     user_id = get_jwt_identity()
-    qn = Question.fetch_one_user_question(user_id, question_id)
-    ans = Question.fetch_answers(question_id)
+    qn = Question.fetch_one_question(user_id, question_id)
+    ans = Answer.fetch_answers(question_id)
     if qn is not None:
         if not ans:
             return jsonify({
@@ -266,23 +268,18 @@ def delete_question(question_id):
         return jsonify({
             'message': 'There are no questions to delete!'
         }), 400
-    question = Question.fetch_question_by_id(question_id)
-    questions = Question.fetch_user_questions(user_id, question_id)
+    question = Question.fetch_one_question(user_id, question_id)
     answers = Answer.fetch_answers(question_id)
-    if questions:
+    if question:
         db.delete_question(user_id, question_id)
-        if answers:
+        if answers is not None or answers != []:
+            db.delete_all_answers(question_id)
             return jsonify({
                 'message': 'Question and answers deleted!'
             }), 200
         return jsonify({
             'message': 'Question deleted!'
         }), 200
-    if question:
-        return jsonify({
-            'message': 'Sorry, you cannot delete a question that does not \
-belong to you!'
-        }), 400
     return jsonify({
         'message': 'Sorry, this question does not exist!'
     }), 400
@@ -333,7 +330,8 @@ def modify_question(question_id):
     }), 400
 
 
-@mod.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
+@mod.route('/questions/<int:question_id>/answers/<int:answer_id>',
+           methods=['PUT'])
 @jwt_required
 def accept_answer(question_id, answer_id):
     """
@@ -351,7 +349,7 @@ def accept_answer(question_id, answer_id):
     An error message if either the question or answer does not exist.
     """
     user_id = get_jwt_identity()
-    qn = Question.fetch_user_questions(user_id, question_id)
+    qn = Question.fetch_one_question(user_id, question_id)
     ans = Answer.fetch_answers(question_id)
     if qn:
         if not ans:
@@ -371,3 +369,50 @@ def accept_answer(question_id, answer_id):
         return jsonify({
             'message': 'Sorry, that question does not exist!'
         }), 400
+
+
+@mod.route('/question/<int:question_id>/answer/<int:answer_id>',
+           methods=['PUT'])
+@jwt_required
+def modify_answer(question_id, answer_id):
+    """
+    Function enables a logged in user modify their answer to a question on the
+    platform.
+
+    :params:
+    question_id - holds the integer value of the question id which is to be
+    modified.
+
+    answer_id - holds the integer value of the answer id which is to be
+    modified.
+
+    :returns:
+    The modified answer incase of success.
+
+    Appropriate error messages in case of failure.
+    """
+    data = request.get_json()
+
+    answer = data.get('answer')
+
+    user_id = get_jwt_identity()
+
+    if not answer or answer.isspace():
+        return jsonify({
+            "message": "Sorry, you didn't enter any question!"
+        }), 400
+    qn = Question.fetch_question_by_id(question_id)
+    ans = Answer.fetch_answers_by_user_id(user_id, question_id, answer_id)
+    if not qn:
+        return({
+            'message': 'Sorry the question does not exist!'
+        }), 400
+    if not ans:
+        return({
+            'message': 'Sorry, this question does not have this answer yet!'
+        }), 400
+    db.update_answer(user_id, question_id, answer)
+    return jsonify({
+        'answer': ans,
+        'message': 'Answer has been updated successfully!'
+    })

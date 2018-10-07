@@ -821,6 +821,6 @@ class TestQuestions(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_answers_table()
-        self.db.drop_questions_table()
+        self.db.drop_table('users')
+        self.db.drop_table('questions')
+        self.db.drop_table('answers')

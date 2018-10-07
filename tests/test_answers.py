@@ -406,7 +406,6 @@ class TestAnswer(unittest.TestCase):
         Test that a user can not accept an answer which
         does not exist.
         """
-        
         user1 = dict(
             username='username',
             email='username@mail.com',
@@ -576,6 +575,6 @@ class TestAnswer(unittest.TestCase):
             )
 
     def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_questions_table()
-        self.db.drop_answers_table()
+        self.db.drop_table('users')
+        self.db.drop_table('questions')
+        self.db.drop_table('answers')

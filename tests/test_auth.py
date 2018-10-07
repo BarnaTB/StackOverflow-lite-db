@@ -304,6 +304,4 @@ upper case and numbers and should be 6 characters or longer."
         self.assertIn(reply['token'], reply['token'])
 
     def tearDown(self):
-        self.db.drop_user_table()
-        self.db.drop_questions_table()
-        self.db.drop_answers_table()
+        self.db.drop_table('users')

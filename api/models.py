@@ -82,11 +82,25 @@ class User:
 
     @staticmethod
     def verify_password(username, password):
-        user_password = db.fetch_user_password(username)
-        user_pass = user_password[0][0]
-        if not User.verify_hash(password, user_pass):
+        user = db.fetch_user(username)
+        if not User.verify_hash(password, user[3]):
             return False
         return True
+
+    @staticmethod
+    def fetch_user(username):
+        user = db.fetch_user(username)
+        if user == [] or user is None:
+            return False
+        else:
+            user_dict = {}
+            print(user)
+            user_dict['userid'] = user[0]
+            user_dict['username'] = user[1]
+            user_dict['email'] = user[2]
+            user_dict['password'] = user[3]
+
+            return user_dict
 
 
 class Question:
@@ -104,33 +118,6 @@ class Question:
         return qn
 
     @staticmethod
-    def fetch_one_user_question(user_id, question_id):
-        qn = db.fetch_one_user_question(user_id, question_id)
-        if qn is None or qn == []:
-            return None
-        else:
-            question = {}
-            question['question_id'] = qn[0][1]
-            question['question'] = qn[0][2]
-
-            return question
-
-    @staticmethod
-    def fetch_answers(question_id):
-        ans = db.fetch_answers_by_question_id(question_id)
-        if ans is None or ans == []:
-            return False
-        for answer in ans:
-            answer_dict = {}
-            print(answer)
-            answer['answerid'] = answer[2]
-            answer['answer'] = answer[3]
-            answer['accepted'] = answer[4]
-
-            answers.append(answer_dict)
-        return answers
-
-    @staticmethod
     def fetch_question_by_id(question_id):
         qn = db.fetch_question_by_id(question_id)
         if qn is None or qn == []:
@@ -144,8 +131,8 @@ class Question:
             return question
 
     @staticmethod
-    def fetch_user_questions(user_id, question_id):
-        qns = db.fetch_user_questions(user_id, question_id)
+    def fetch_one_question(user_id, question_id):
+        qns = db.fetch_one_question(user_id, question_id)
         if qns is None or qns == []:
             return None
         else:
@@ -159,7 +146,7 @@ class Question:
     def update_question(user_id, question_id, question):
         db.update_question(user_id, question_id, question)
 
-        qn = db.fetch_user_questions(user_id, question_id)
+        qn = db.fetch_one_question(user_id, question_id)
         dict_question = {}
         dict_question['userid'] = qn[0][0]
         dict_question['questionid'] = qn[0][1]
@@ -171,6 +158,7 @@ class Question:
         qns = db.fetch_questions(user_id)
         if qns is None or qns == []:
             return None
+        questions.clear()
         for question in qns:
             question_dict = {}
             question_dict['question_id'] = question[1]
@@ -192,6 +180,29 @@ class Answer:
     @staticmethod
     def fetch_answers(question_id):
         ans = db.fetch_answers_by_question_id(question_id)
-        if ans is None:
-            return None
-        return ans
+        if ans is None or ans == []:
+            return False
+        answers.clear()
+        for answer in ans:
+            answer_dict = {}
+            answer_dict['answerid'] = answer[2]
+            answer_dict['answer'] = answer[3]
+            answer_dict['accepted'] = answer[4]
+
+            answers.append(answer_dict)
+        return answers
+
+    @staticmethod
+    def fetch_answers_by_user_id(user_id, question_id, answer_id):
+        ans = db.fetch_answers_by_user_id(user_id, question_id, answer_id)
+        if ans is None or ans == []:
+            return False
+        answers.clear()
+        for answer in ans:
+            answer_dict = {}
+            answer_dict['answerid'] = answer[2]
+            answer_dict['answer'] = answer[3]
+            answer_dict['accepted'] = answer[4]
+
+            answers.append(answer_dict)
+        return answers
